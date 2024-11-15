@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\ClientResponse;
 use GuzzleHttp\Client;
+use App\Models\ClientResponse;
+use Illuminate\Support\Facades\Log;
 
 class PaymentService
 {
@@ -23,18 +24,17 @@ class PaymentService
                     ['transaction_id' => $transaction->id],
                     ['data' => json_encode($response->getBody()->getContents())]
                 );
-                \Log::info("Успешный асинхронный запрос ({$postUrl}): " . $response->getBody());
+                Log::info("Успешный асинхронный запрос ({$postUrl}): " . $response->getBody());
             },
             function ($exception) use ($postUrl, $transaction) {
                 ClientResponse::updateOrCreate(
                     ['transaction_id' => $transaction->id],
                     ['data' => json_encode($exception->getMessage())]
                 );
-                \Log::error("Ошибка при отправке асинхронного запроса ({$postUrl}): " . $exception->getMessage());
+                Log::error("Ошибка при отправке асинхронного запроса ({$postUrl}): " . $exception->getMessage());
             }
         );
 
         $promise->wait();
     }
-
 }

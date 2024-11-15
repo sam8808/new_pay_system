@@ -6,16 +6,15 @@ use App\Models\PaymentSystem;
 use App\Models\PSInfo;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+
+
 
 class PaymentSystemService
 {
     /**
      * @param Request $request
      */
-    public function __construct(public readonly Request $request)
-    {
-    }
+    public function __construct(public readonly Request $request) {}
 
     /**
      * @return $this

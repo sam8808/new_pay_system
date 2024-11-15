@@ -1,16 +1,17 @@
 <?php
 
-use App\Http\Controllers\MainController;
-use App\Http\Controllers\MerchantController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dashboard\MainController;
+use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\ProfileController;
+use App\Http\Controllers\Dashboard\MerchantController;
+use App\Http\Controllers\Dashboard\WithdrawalController;
 
 
-Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', [MainController::class, 'index'])
+Route::prefix('dashboard')->middleware('auth')->group(function () {
+
+    Route::get('', [MainController::class, 'index'])
         ->name('dashboard');
 
     Route::get('history', [MainController::class, 'history'])
@@ -69,5 +70,4 @@ Route::middleware('auth')->group(function () {
 
     Route::get('orders', [OrderController::class, 'index'])
         ->name('user.orders');
-
 });

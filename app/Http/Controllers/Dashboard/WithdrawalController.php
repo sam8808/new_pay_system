@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Merchant;
-use App\Models\PaymentSystem;
-use App\Models\Transaction;
 use App\Models\Withdrawal;
-use App\Services\ExchangeService;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use App\Models\PaymentSystem;
+use App\Services\ExchangeService;
+use App\Http\Controllers\Controller;
 
 class WithdrawalController extends Controller
 {

@@ -9,7 +9,7 @@
     }
 
     .dashboard-active-link {
-        @apply text-gold-100
+        @apply text-slate-100
     }
 }
 

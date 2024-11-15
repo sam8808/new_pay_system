@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Merchant;
-use App\Services\MerchantService;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Services\MerchantService;
+use Illuminate\Contracts\View\View;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Application;
 
 class MerchantController extends Controller
 {
@@ -102,5 +103,4 @@ class MerchantController extends Controller
 
         return redirect()->route('merchant');
     }
-
 }

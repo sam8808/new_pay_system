@@ -23,9 +23,9 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->routes(function () {
             Route::middleware('web')->group(function () {
-                require base_path('routes/main.php');
-                require base_path('routes/user.php');
+                require base_path('routes/web.php');
                 require base_path('routes/auth.php');
+                require base_path('routes/dashboard.php');
             });
 
             Route::middleware('web')
@@ -39,7 +39,6 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(function () {
                     require base_path('routes/admin.php');
                 });
-
         });
     }
 }
