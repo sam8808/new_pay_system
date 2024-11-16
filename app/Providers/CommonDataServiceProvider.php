@@ -24,15 +24,15 @@ class CommonDataServiceProvider extends ServiceProvider
     {
         view()->share('newMerchants', Merchant::where('approved', false)
             ->where('rejected', false)
-            ->count());
+            ->count()) ?? 0;
 
         view()->share('newPayment', Payment::where('approved', false)
             ->whereNotNull('pay_screen')
             ->where('canceled', false)
-            ->count());
+            ->count()) ?? 0;
 
         view()->share('newWithdrawal', Withdrawal::where('approved', false)
             ->where('canceled', false)
-            ->count());
+            ->count()) ?? 0;
     }
 }

@@ -1,3 +1,40 @@
+<script setup>
+import { reactive, ref, defineProps } from "vue";
+import FormInput from "../../Components/FormInput.vue";
+import { CiUser, CiMail, CiLock, CoUserPlus } from "@kalimahapps/vue-icons";
+import { router, usePage } from "@inertiajs/vue3";
+import Alert from "../../Components/Alert.vue";
+
+defineProps({
+    errors: {
+        type: Object,
+    },
+});
+
+const page = usePage();
+
+const companyName = "Payment System";
+const loading = ref(false);
+
+const form = reactive({
+    username: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+    agreement: false,
+});
+
+const submit = () => {
+    loading.value = true;
+    router.post(route("register.store"), form, {
+        preserveScroll: true,
+        onFinish: () => {
+            loading.value = false;
+        },
+    });
+};
+</script>
+
 <template>
     <div
         class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-violet-100 to-gray-100 flex flex-col justify-center items-center p-6"
@@ -31,139 +68,48 @@
                 </div>
 
                 <!-- Form section -->
-                <div class="space-y-6">
-                    <!-- Username input group -->
-                    <div class="space-y-2 group">
-                        <label
-                            class="text-sm font-semibold text-gray-600 ml-1 group-focus-within:text-blue-600 transition-colors"
-                        >
-                            Ваше имя
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-3.5 text-gray-400">
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                    ></path>
-                                </svg>
-                            </span>
-                            <input
-                                name="username"
-                                type="text"
-                                class="w-full h-12 pl-12 pr-4 bg-white/50 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200/50 transition duration-200 ease-in-out placeholder-gray-400 shadow-sm"
-                                placeholder="Джон Доу"
-                            />
-                        </div>
-                        <p class="text-red-500 text-xs ml-1">{{ message }}</p>
-                    </div>
+                <form @submit.prevent="submit" class="space-y-4">
+                    <FormInput
+                        v-model="form.username"
+                        title="Имя пользователя"
+                        type="text"
+                        :message="errors.username"
+                        :icon="CiUser"
+                        placeholder="Введите имя пользователя"
+                        autocomplete="username"
+                    />
 
-                    <!-- Email input group -->
-                    <div class="space-y-2 group">
-                        <label
-                            class="text-sm font-semibold text-gray-600 ml-1 group-focus-within:text-blue-600 transition-colors"
-                        >
-                            Email адрес
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-3.5 text-gray-400">
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                    ></path>
-                                </svg>
-                            </span>
-                            <input
-                                name="email"
-                                type="text"
-                                class="w-full h-12 pl-12 pr-4 bg-white/50 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200/50 transition duration-200 ease-in-out placeholder-gray-400 shadow-sm"
-                                placeholder="email@example.com"
-                            />
-                        </div>
-                        <p class="text-red-500 text-xs ml-1">{{ message }}</p>
-                    </div>
+                    <FormInput
+                        v-model="form.email"
+                        title="Email"
+                        type="email"
+                        :message="errors.email"
+                        :icon="CiMail"
+                        placeholder="Введите email"
+                        autocomplete="email"
+                    />
 
-                    <!-- Password input group -->
-                    <div class="space-y-2 group">
-                        <label
-                            class="text-sm font-semibold text-gray-600 ml-1 group-focus-within:text-blue-600 transition-colors"
-                        >
-                            Пароль
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-3.5 text-gray-400">
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                    ></path>
-                                </svg>
-                            </span>
-                            <input
-                                name="password"
-                                type="password"
-                                class="w-full h-12 pl-12 pr-4 bg-white/50 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200/50 transition duration-200 ease-in-out placeholder-gray-400 shadow-sm"
-                                placeholder="Минимум 8 символов"
-                            />
-                        </div>
-                        <p class="text-red-500 text-xs ml-1">{{ message }}</p>
-                    </div>
+                    <FormInput
+                        v-model="form.password"
+                        title="Пароль"
+                        type="password"
+                        :message="errors.password"
+                        :icon="CiLock"
+                        placeholder="Введите пароль"
+                        :minLength="8"
+                        autocomplete="new-password"
+                    />
 
-                    <!-- Password confirmation input group -->
-                    <div class="space-y-2 group">
-                        <label
-                            class="text-sm font-semibold text-gray-600 ml-1 group-focus-within:text-blue-600 transition-colors"
-                        >
-                            Подтверждение пароля
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-3.5 text-gray-400">
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                    ></path>
-                                </svg>
-                            </span>
-                            <input
-                                name="password_confirmation"
-                                type="password"
-                                class="w-full h-12 pl-12 pr-4 bg-white/50 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200/50 transition duration-200 ease-in-out placeholder-gray-400 shadow-sm"
-                                placeholder="Повторите пароль"
-                            />
-                        </div>
-                        <p class="text-red-500 text-xs ml-1">{{ message }}</p>
-                    </div>
-
+                    <FormInput
+                        v-model="form.password_confirmation"
+                        title="Подтверждение пароля"
+                        type="password"
+                        :message="errors.password_confirmation"
+                        :icon="CiLock"
+                        placeholder="Подтвердите пароль"
+                        :minLength="8"
+                        autocomplete="new-password"
+                    />
                     <!-- Terms agreement -->
                     <div class="flex items-start space-x-3 mt-6">
                         <input
@@ -189,22 +135,38 @@
 
                     <!-- Action buttons -->
                     <button
+                        :disabled="!form.agreement"
                         type="submit"
-                        class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white py-3.5 rounded-xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 transform hover:-translate-y-0.5 transition duration-200 ease-in-out shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.15)] active:transform-none flex justify-center items-center space-x-2"
+                        class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white py-3.5 rounded-xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 transform hover:-translate-y-0.5 transition duration-200 ease-in-out shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.15)] active:transform-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] flex justify-center items-center space-x-2"
                     >
                         <span>Зарегистрироваться</span>
-                        <svg
+                        <!-- Опционально: можно добавить иконку -->
+                        <component
+                            :is="CoUserPlus"
                             class="w-5 h-5"
+                            v-if="!loading"
+                        />
+                        <!-- Опционально: индикатор загрузки -->
+                        <svg
+                            v-if="loading"
+                            class="animate-spin h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
                             fill="none"
-                            stroke="currentColor"
                             viewBox="0 0 24 24"
                         >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            />
                             <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13 7l5 5m0 0l-5 5m5-5H6"
-                            ></path>
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
                         </svg>
                     </button>
 
@@ -218,7 +180,16 @@
                             <span>Уже есть аккаунт? Войти</span>
                         </Link>
                     </div>
-                </div>
+
+                    <div class="text-center">
+                        <Link
+                            :href="route('home')"
+                            class="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-700 font-medium transition duration-200"
+                        >
+                            <span>На главную</span>
+                        </Link>
+                    </div>
+                </form>
             </div>
 
             <!-- Brand badge -->
@@ -348,22 +319,5 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { reactive } from 'vue';
-
-const message = "Test Message";
-const companyName = "Payment System";
-
-
-const form = reactive({
-    username: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    agreement: false,
-})
-
-</script>
 
 <style></style>

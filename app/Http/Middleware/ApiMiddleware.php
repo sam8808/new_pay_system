@@ -18,7 +18,7 @@ class ApiMiddleware
         if ($this->isProcess($request)) {
             return $next($request);
         }
-        exit(456456465);
+
         abort(403);
     }
 

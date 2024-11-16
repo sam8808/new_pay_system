@@ -7,7 +7,8 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisterController::class, 'index'])
         ->name('register');
 
-    Route::post('register', [RegisterController::class, 'store']);
+    Route::post('register', [RegisterController::class, 'store'])
+        ->name('register.store');
 
     Route::get('login', function () {
         return 'Login';

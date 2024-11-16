@@ -5,21 +5,21 @@ namespace App\Services\Auth;
 
 use Exception;
 use App\Models\User;
-use Ramsey\Uuid\Uuid;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\WelcomeNotify;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
 
 class RegisterService
 {
     protected const RULES = [
-        'username' => ['required|string|unique:users'],
-        'email' => ['required|email'],
-        'password' => ['required|confirmed'],
+        'username' => ['required', 'string', 'max:20'],
+        'email' => ['required', 'email'],
+        'password' => ['required', 'confirmed'],
         'password_confirmation' => ['required'],
     ];
 
@@ -27,6 +27,7 @@ class RegisterService
     protected string $email = '';
     protected string $password = '';
     protected string $password_confirmation = '';
+    protected $agreement;
     protected array $errors = [];
     protected bool $fail = false;
 
@@ -38,6 +39,7 @@ class RegisterService
         $this->email = $data['email'] ?? '';
         $this->password = $data['password'] ?? '';
         $this->password_confirmation = $data['password_confirmation'] ?? '';
+        $this->agreement = $data['agreement'] ?? false;
     }
 
     public static function init(array $data): static
@@ -69,6 +71,12 @@ class RegisterService
 
         if ($this->usernameExists()) {
             $this->errors = [__('User with this username already exists')];
+            return false;
+        }
+
+        if (!$this->checkAgreement()) {
+            $this->errors = [__('checkAgreement error')];
+            return false;
         }
 
         return true;
@@ -112,14 +120,14 @@ class RegisterService
         return $this->fail;
     }
 
-    // public function welcomeMailNotify()
-    // {
-    //     $this->user->notify(new WelcomeNotify());
-    // }
-
-    public function responseSuccess(): JsonResponse
+    public function welcomeMailNotify()
     {
-        return response()->json([
+        $this->user->notify(new WelcomeNotify());
+    }
+
+    public function responseSuccess()
+    {
+        return  Redirect::back()->withErrors([
             'message' => __('Registration successful'),
             'status' => 'success',
         ], 200);
@@ -155,5 +163,10 @@ class RegisterService
             return User::where('ref_code', $code)->value('id');
         }
         return null;
+    }
+
+    private function checkAgreement()
+    {
+        return $this->agreement;
     }
 }
