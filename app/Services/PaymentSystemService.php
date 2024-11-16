@@ -108,9 +108,9 @@ class PaymentSystemService
 
 
     /**
-     * @return \App\Services\FileUploadService
+     * @return FileUploadService
      */
-    public function getFileUpload(): \App\Services\FileUploadService
+    public function getFileUpload(): FileUploadService
     {
         $fileUpload = new FileUploadService($this->request->file('logo'), 'payment_systems');
         $fileUpload->upload();

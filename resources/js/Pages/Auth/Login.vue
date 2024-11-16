@@ -1,10 +1,9 @@
 <script setup>
 import { reactive, ref, defineProps } from "vue";
 import FormInput from "../../Components/FormInput.vue";
-import { CiMail, CiLock, CoUserPlus } from "@kalimahapps/vue-icons";
+import { MiLoginHalfCircle, CiMail, CiLock } from "@kalimahapps/vue-icons";
 import { router, usePage } from "@inertiajs/vue3";
 import Alert from "../../Components/Alert.vue";
-
 defineProps({
     errors: {
         type: Object,
@@ -19,13 +18,11 @@ const loading = ref(false);
 const form = reactive({
     email: "",
     password: "",
-    password_confirmation: "",
-    agreement: false,
 });
 
 const submit = () => {
     loading.value = true;
-    router.post(route("register.store"), form, {
+    router.post(route("login.store"), form, {
         preserveScroll: true,
         onFinish: () => {
             loading.value = false;
@@ -38,7 +35,6 @@ const submit = () => {
     <div
         class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-violet-100 to-gray-100 flex flex-col justify-center items-center p-6"
     >
-        <!-- Floating shapes background -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div
                 class="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/30 to-indigo-400/30 rounded-full filter blur-3xl"
@@ -48,13 +44,10 @@ const submit = () => {
             ></div>
         </div>
 
-        <!-- Main container -->
         <div class="relative w-full max-w-md">
-            <!-- Card -->
             <div
                 class="bg-white/80 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-3xl p-8 border border-white/20"
             >
-                <!-- Header section -->
                 <div class="mb-10 space-y-2">
                     <h1
                         class="text-4xl font-bold text-center bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"
@@ -62,13 +55,12 @@ const submit = () => {
                         Добро пожаловать
                     </h1>
                     <p class="text-gray-500 text-center font-medium">
-                        Создайте аккаунт для полного доступа
+                        Войдите в аккаунт
                     </p>
                 </div>
 
                 <!-- Form section -->
                 <form @submit.prevent="submit" class="space-y-4">
-
                     <FormInput
                         v-model="form.email"
                         title="Email"
@@ -90,53 +82,16 @@ const submit = () => {
                         autocomplete="new-password"
                     />
 
-                    <FormInput
-                        v-model="form.password_confirmation"
-                        title="Подтверждение пароля"
-                        type="password"
-                        :message="errors.password_confirmation"
-                        :icon="CiLock"
-                        placeholder="Подтвердите пароль"
-                        :minLength="8"
-                        autocomplete="new-password"
-                    />
-                    <!-- Terms agreement -->
-                    <div class="flex items-start space-x-3 mt-6">
-                        <input
-                            v-model="form.agreement"
-                            type="checkbox"
-                            class="mt-1 rounded border-gray-300 text-blue-600 focus:border-blue-500 focus:ring-blue-200/50"
-                        />
-                        <p class="text-sm text-gray-500">
-                            Я согласен с
-                            <a
-                                href="#"
-                                class="text-blue-600 hover:text-blue-700"
-                                >Условиями использования</a
-                            >
-                            и
-                            <a
-                                href="#"
-                                class="text-blue-600 hover:text-blue-700"
-                                >Политикой конфиденциальности</a
-                            >
-                        </p>
-                    </div>
-
-                    <!-- Action buttons -->
                     <button
-                        :disabled="!form.agreement"
                         type="submit"
                         class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white py-3.5 rounded-xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 transform hover:-translate-y-0.5 transition duration-200 ease-in-out shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.15)] active:transform-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] flex justify-center items-center space-x-2"
                     >
-                        <span>Зарегистрироваться</span>
-                        <!-- Опционально: можно добавить иконку -->
+                        <span>Войти</span>
                         <component
-                            :is="CoUserPlus"
+                            :is="MiLoginHalfCircle"
                             class="w-5 h-5"
                             v-if="!loading"
                         />
-                        <!-- Опционально: индикатор загрузки -->
                         <svg
                             v-if="loading"
                             class="animate-spin h-5 w-5"
@@ -160,14 +115,13 @@ const submit = () => {
                         </svg>
                     </button>
 
-                    <!-- Login link -->
                     <div class="text-center">
                         <Link
-                            :href="route('login')"
+                            :href="route('register')"
                             class="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-700 font-medium transition duration-200"
                         >
                             <span>←</span>
-                            <span>Уже есть аккаунт? Войти</span>
+                            <span>У вас нет аккаунта? Регистрация</span>
                         </Link>
                     </div>
 
@@ -182,7 +136,6 @@ const submit = () => {
                 </form>
             </div>
 
-            <!-- Brand badge -->
             <div
                 class="absolute -top-2 -right-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-lg border border-white/20 flex items-center space-x-1"
             >
