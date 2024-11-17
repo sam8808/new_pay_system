@@ -68,5 +68,4 @@ class Transaction extends Model
     {
         return $this->hasOne(ClientResponse::class, 'transaction_id');
     }
-
 }

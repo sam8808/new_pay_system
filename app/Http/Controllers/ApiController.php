@@ -35,9 +35,9 @@ class ApiController extends Controller
         $paymentSystems = PaymentSystem::query()
             ->where('currency', $request->only('currency'))
             ->where('activated', true)
-            ->when($this->shouldExcludeById($request->input('amount')), function ($query) {
-                return $query->whereNotIn('title', ['Card AZ']);
-            })
+            // ->when($this->shouldExcludeById($request->input('amount')), function ($query) {
+            //     return $query->whereNotIn('title', ['Card AZ']);
+            // })
             ->get();
 
 
@@ -150,18 +150,18 @@ class ApiController extends Controller
         return response()->json(['message' => 'Waiting'], 200);
     }
 
-//    public function payConfirmManual(Request $request, $id): RedirectResponse
-//    {
-//        $transaction = Transaction::find($id);
-//
-//        if ($transaction->payment->approved) {
-//            $transaction->confirmed = true;
-//            $transaction->save();
-//            $this->sendAsyncRequest($transaction);
-//        }
-//
-//        return back();
-//    }
+    //    public function payConfirmManual(Request $request, $id): RedirectResponse
+    //    {
+    //        $transaction = Transaction::find($id);
+    //
+    //        if ($transaction->payment->approved) {
+    //            $transaction->confirmed = true;
+    //            $transaction->save();
+    //            $this->sendAsyncRequest($transaction);
+    //        }
+    //
+    //        return back();
+    //    }
 
     /**
      * @param Request $request
@@ -188,6 +188,4 @@ class ApiController extends Controller
     {
         return $amount < 10;
     }
-
-
 }

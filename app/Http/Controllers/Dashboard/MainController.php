@@ -2,26 +2,30 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use Inertia\Inertia;
 use App\Models\Transaction;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 
 class MainController extends Controller
 {
     public function index()
     {
-        return redirect()->route('history');
+        return Inertia::render('Dashboard/Index');
     }
 
 
     public function history()
     {
-        $transactions = Transaction::where('user_id', auth()->user()->id)
+        $transactions = Transaction::where('user_id', Auth::user()->id)
             ->orderByDesc('created_at')
             ->paginate(10);
 
 
-        return view('user.history', ['operations' => $transactions]);
+        return Inertia::render('Dashboard/History', [
+            'operations' => $transactions
+        ]);
     }
 
     public function transaction($id)
