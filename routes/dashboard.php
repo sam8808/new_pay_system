@@ -14,14 +14,14 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
     Route::get('', [MainController::class, 'index'])
         ->name('dashboard');
 
-    Route::get('history', [MainController::class, 'history'])
-        ->name('history');
+    Route::get('transactions', [MainController::class, 'transactions'])
+        ->name('transactions');
 
     Route::get('{id}/transaction', [MainController::class, 'transaction'])
         ->name('transaction');
 
     Route::prefix('profile')->group(function () {
-        Route::get('edit', [ProfileController::class, 'edit'])
+        Route::get('', [ProfileController::class, 'edit'])
             ->name('profile.edit');
 
         Route::put('update', [ProfileController::class, 'update'])

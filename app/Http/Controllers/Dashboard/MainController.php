@@ -16,15 +16,15 @@ class MainController extends Controller
     }
 
 
-    public function history()
+    public function transactions()
     {
         $transactions = Transaction::where('user_id', Auth::user()->id)
             ->orderByDesc('created_at')
             ->paginate(10);
 
 
-        return Inertia::render('Dashboard/History', [
-            'operations' => $transactions
+        return Inertia::render('Dashboard/Transactions', [
+            'transactions' => $transactions
         ]);
     }
 

@@ -16,7 +16,7 @@ import {
 
 // Пропсы
 const props = defineProps({
-    operations: {
+    transactions: {
         type: Object,
         required: true
     }
@@ -31,17 +31,17 @@ const showDetails = ref(null)
 const selectedRows = ref(new Set())
 
 // Фильтрация операций
-const filteredOperations = computed(() => {
-    return props.operations.data.filter(operation => {
-        const matchesSearch = operation.id.toString().includes(searchQuery.value) ||
+const filteredTransaction = computed(() => {
+    return props.transactions.data.filter(transaction => {
+        const matchesSearch = transaction.id.toString().includes(searchQuery.value) ||
                             searchQuery.value === '';
         
         const matchesStatus = selectedStatus.value === 'all' ? true :
-            selectedStatus.value === 'confirmed' ? operation.confirmed :
-            selectedStatus.value === 'canceled' ? operation.canceled : true;
+            selectedStatus.value === 'confirmed' ? transaction.confirmed :
+            selectedStatus.value === 'canceled' ? transaction.canceled : true;
             
         const matchesType = selectedType.value === 'all' ? true :
-            operation.type === selectedType.value;
+        transaction.type === selectedType.value;
             
         return matchesSearch && matchesStatus && matchesType;
     });
@@ -69,15 +69,15 @@ const formatAmount = (amount) => {
 }
 
 // Получение статуса операции
-const getOperationStatus = (operation) => {
-    if (operation.confirmed) {
+const getTransactionStatus = (transaction) => {
+    if (transaction.confirmed) {
         return {
             icon: CheckCircle,
             class: 'bg-green-100 text-green-700',
             text: 'Подтверждено'
         }
     }
-    if (operation.canceled) {
+    if (transaction.canceled) {
         return {
             icon: XCircle,
             class: 'bg-red-100 text-red-700',
@@ -188,22 +188,22 @@ const toggleRowSelection = (id) => {
 
                         <tbody class="divide-y divide-slate-200 bg-white">
                             <tr 
-                                v-for="operation in filteredOperations" 
-                                :key="operation.id"
+                                v-for="transaction in filteredTransaction" 
+                                :key="transaction.id"
                                 class="hover:bg-slate-50 transition-colors"
-                                :class="{ 'bg-blue-50/50': selectedRows.has(operation.id) }"
+                                :class="{ 'bg-blue-50/50': selectedRows.has(transaction.id) }"
                             >
                                 <!-- ID -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm font-medium text-slate-900">
-                                        #{{ operation.id }}
+                                        #{{ transaction.id }}
                                     </span>
                                 </td>
 
                                 <!-- Дата -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-slate-900">
-                                        {{ formatDate(operation.created_at) }}
+                                        {{ formatDate(transaction.created_at) }}
                                     </div>
                                 </td>
 
@@ -212,12 +212,12 @@ const toggleRowSelection = (id) => {
                                     <span
                                         :class="[
                                             'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                                            operation.type === 'payIn' 
+                                            transaction.type === 'payIn' 
                                                 ? 'bg-green-100 text-green-800'
                                                 : 'bg-red-100 text-red-800'
                                         ]"
                                     >
-                                        {{ operation.type === 'payIn' ? 'Пополнение' : 'Вывод' }}
+                                        {{ transaction.type === 'payIn' ? 'Пополнение' : 'Вывод' }}
                                     </span>
                                 </td>
 
@@ -226,17 +226,17 @@ const toggleRowSelection = (id) => {
                                     <div 
                                         :class="[
                                             'text-sm font-medium',
-                                            operation.type === 'payIn' ? 'text-green-600' : 'text-red-600'
+                                            transaction.type === 'payIn' ? 'text-green-600' : 'text-red-600'
                                         ]"
                                     >
-                                        {{ formatAmount(operation.amount) }}
+                                        {{ formatAmount(transaction.amount) }}
                                     </div>
                                 </td>
 
                                 <!-- Валюта -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-slate-900">
-                                        {{ operation.currency }}
+                                        {{ transaction.currency }}
                                     </div>
                                 </td>
 
@@ -245,21 +245,21 @@ const toggleRowSelection = (id) => {
                                     <div 
                                         :class="[
                                             'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium',
-                                            getOperationStatus(operation).class
+                                            getTransactionStatus(transaction).class
                                         ]"
                                     >
                                         <component 
-                                            :is="getOperationStatus(operation).icon"
+                                            :is="getTransactionStatus(transaction).icon"
                                             class="w-4 h-4 mr-1.5"
                                         />
-                                        {{ getOperationStatus(operation).text }}
+                                        {{ getTransactionStatus(transaction).text }}
                                     </div>
                                 </td>
 
                                 <!-- Действия -->
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <button 
-                                        @click="showDetails = showDetails === operation.id ? null : operation.id"
+                                        @click="showDetails = showDetails === transaction.id ? null : transaction.id"
                                         class="btn-icon"
                                     >
                                         <Eye class="w-4 h-4" />
@@ -272,7 +272,7 @@ const toggleRowSelection = (id) => {
 
                 <!-- Пагинация -->
                 <div class="border-t border-slate-200">
-                    <Pagination :links="operations.links" class="px-4" />
+                    <Pagination :links="transactions.links" class="px-4" />
                 </div>
             </div>
         </div>

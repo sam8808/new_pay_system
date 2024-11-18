@@ -29,8 +29,8 @@ const navigationItems = [
         badge: 3,
     },
     {
-        name: "История",
-        route: "history",
+        name: "Транзакции",
+        route: "transactions",
         icon: History,
     },
     {
