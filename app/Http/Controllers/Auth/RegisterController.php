@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendEmailNotification;
 use App\Jobs\SendTelegramNotification;
+use App\Services\Auth\LoginService;
 use App\Services\Auth\RegisterService;
 use Illuminate\Support\Facades\Redirect;
 
@@ -21,6 +22,7 @@ class RegisterController extends Controller
     public function store(Request $request)
     {
         $service = RegisterService::init($request->all());
+        $loginService = LoginService::init($request->only(['email', 'password']));
 
         if (!$service->validate()) {
             return Redirect::back()->withErrors($service->getErrors());
@@ -34,14 +36,13 @@ class RegisterController extends Controller
 
         $message = "🔔 Новый пользователь!\n" .
             "Email: {$service->user()->email}\n" .
-            "Username: {$service->user()->username}";
+            "ID: {$service->user()->identify}";
 
         SendEmailNotification::dispatch($service->user());
         SendTelegramNotification::dispatch($message);
 
-        return  Redirect::back()->with([
-            'message' => __('Registration successful'),
-            'status' => 'success',
-        ]);
+        $loginService->store();
+
+        return  Redirect::route('dashboard');
     }
 }

@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\PaymentSystemDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PaymentSystem extends Model
 {
@@ -33,9 +34,9 @@ class PaymentSystem extends Model
     /**
      * @return HasMany
      */
-    public function infos(): HasMany
+    public function details(): HasMany
     {
-        return $this->hasMany(PSInfo::class, 'ps_id');
+        return $this->hasMany(PaymentSystemDetail::class, 'ps_id');
     }
 
     /**

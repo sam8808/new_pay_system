@@ -5,8 +5,7 @@ use App\Http\Controllers\Admin\MainController;
 use App\Http\Controllers\Admin\MerchantController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentSystemController;
-use App\Http\Controllers\Admin\PSInfoController;
-use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\Admin\PaymentSystemDetailController;
 use App\Http\Controllers\Admin\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
@@ -73,28 +72,28 @@ Route::middleware('admin.auth')->group(function () {
         Route::post('{id}/change', [PaymentSystemController::class, 'changeStatus'])
             ->name('admin.ps.change');
 
-        Route::get('info', [PSInfoController::class, 'index'])
+        Route::get('info', [PaymentSystemDetailController::class, 'index'])
             ->name('admin.ps.info');
 
-        Route::get('{id}/info', [PSInfoController::class, 'show'])
+        Route::get('{id}/info', [PaymentSystemDetailController::class, 'show'])
             ->name('admin.ps.info.show');
 
-        Route::get('info/create', [PSInfoController::class, 'create'])
+        Route::get('info/create', [PaymentSystemDetailController::class, 'create'])
             ->name('admin.ps.info.create');
 
-        Route::post('info/create', [PSInfoController::class, 'store'])
+        Route::post('info/create', [PaymentSystemDetailController::class, 'store'])
             ->name('admin.ps.info.store');
 
-        Route::post('{id}/info/change', [PSInfoController::class, 'change'])
+        Route::post('{id}/info/change', [PaymentSystemDetailController::class, 'change'])
             ->name('admin.ps.info.change');
 
-        Route::post('{id}/info/delete', [PSInfoController::class, 'destroy'])
+        Route::post('{id}/info/delete', [PaymentSystemDetailController::class, 'destroy'])
             ->name('admin.ps.info.delete');
 
-        Route::get('{id}/info/edit', [PSInfoController::class, 'edit'])
+        Route::get('{id}/info/edit', [PaymentSystemDetailController::class, 'edit'])
             ->name('admin.ps.info.edit');
 
-        Route::post('{id}/info/update', [PSInfoController::class, 'update'])
+        Route::post('{id}/info/update', [PaymentSystemDetailController::class, 'update'])
             ->name('admin.ps.info.update');
     });
 
@@ -134,5 +133,3 @@ Route::middleware('guest:admin')->group(function () {
     Route::post('login', [LoginController::class, 'store'])
         ->name('admin.login.store');
 });
-
-

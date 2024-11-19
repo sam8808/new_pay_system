@@ -13,14 +13,14 @@ import {
     CreditCard,
     Users,
     Building,
+    KeyRound,
 } from "lucide-vue-next";
 
-// Состояния для сайдбара и поиска
 const sidebarOpen = ref(false);
 const searchQuery = ref("");
 const isCurrentRoute = (name) => route().current(name);
 
-// Навигационные элементы
+// Навигационные элементы остаются теми же
 const navigationItems = [
     {
         name: "Главная",
@@ -35,7 +35,7 @@ const navigationItems = [
     },
     {
         name: "Мерчант",
-        route: "dashboard",
+        route: "merchant",
         icon: Building,
     },
     {
@@ -55,19 +55,10 @@ const navigationItems = [
     },
 ];
 
-// Фильтрация навигации
-const filteredNavigation = computed(() => {
-    if (!searchQuery.value) return navigationItems;
-    return navigationItems.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-});
-
-// Состояния для дропдаунов
+// Остальная логика остается той же
 const profileDropdownOpen = ref(false);
 const notificationsDropdownOpen = ref(false);
 
-// Уведомления
 const notifications = ref([
     {
         id: 1,
@@ -82,7 +73,7 @@ const unreadNotifications = computed(() => {
     return notifications.value.filter((n) => !n.read).length;
 });
 
-// Обработчики для дропдаунов
+// Handlers остаются теми же
 const toggleProfileDropdown = (event) => {
     event.stopPropagation();
     profileDropdownOpen.value = !profileDropdownOpen.value;
@@ -99,7 +90,6 @@ const toggleNotificationsDropdown = (event) => {
     }
 };
 
-// Закрытие дропдаунов при клике вне
 const closeDropdowns = (event) => {
     const isProfileClick = event.target.closest(".profile-dropdown");
     const isNotificationsClick = event.target.closest(
@@ -114,7 +104,6 @@ const closeDropdowns = (event) => {
     }
 };
 
-// Обработка уведомлений
 const markAllNotificationsAsRead = () => {
     notifications.value = notifications.value.map((n) => ({
         ...n,
@@ -122,7 +111,6 @@ const markAllNotificationsAsRead = () => {
     }));
 };
 
-// Управление сайдбаром для мобильных устройств
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
 };
@@ -131,7 +119,6 @@ const closeSidebar = () => {
     sidebarOpen.value = false;
 };
 
-// Lifecycle hooks
 onMounted(() => {
     document.addEventListener("click", closeDropdowns);
 });
@@ -142,278 +129,316 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <!-- Оставьте ваш текущий template без изменений, 
-         но убедитесь, что используются правильные обработчики событий -->
-    <div
-        class="flex h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50"
-    >
+    <div class="flex h-screen bg-[#F7F7F9]">
         <!-- Overlay -->
         <div
             v-show="sidebarOpen"
             @click="closeSidebar"
-            class="fixed z-20 inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity lg:hidden"
+            class="fixed inset-0 z-20 bg-gray-900/20 backdrop-blur-sm lg:hidden"
         ></div>
 
-        <!-- Sidebar -->
-        <div
+        <!-- Сайдбар -->
+        <aside
             :class="[
-                sidebarOpen
-                    ? 'translate-x-0 ease-out'
-                    : '-translate-x-full ease-in',
-                'fixed z-30 inset-y-0 left-0 w-72 transition-all duration-300 transform bg-white/95 backdrop-blur-xl border-r border-slate-100 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 shadow-xl shadow-blue-100/50',
+                'fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out bg-white',
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+                'lg:translate-x-0 lg:static',
             ]"
         >
-            <!-- Logo Container -->
-            <div
-                class="flex items-center justify-center h-16 px-6 border-b border-slate-100"
-            >
-                <div class="w-full">
-                    <a
-                        href="/dashboard"
-                        class="flex items-center justify-center"
-                    >
-                        <img
-                            class="h-8 hover:opacity-80 transition-opacity"
-                            src="https://www.amug.com/wp-content/uploads/2016/09/you-logo-here.png"
-                            alt="Logo"
-                        />
-                    </a>
+            <!-- Логотип -->
+            <div class="flex items-center gap-3 px-5 h-16">
+                <div
+                    class="w-9 h-9 bg-violet-600 rounded-lg flex items-center justify-center"
+                >
+                    <span class="text-white font-bold">L</span>
                 </div>
+                <div class="flex flex-col">
+                    <div class="font-semibold text-gray-900">Logo</div>
+                    <div class="text-xs text-gray-500">Digital Market V1</div>
+                </div>
+                <button class="ml-auto text-gray-400">
+                    <component :is="Menu" class="w-5 h-5" />
+                </button>
             </div>
 
-            <!-- Navigation -->
-            <nav class="mt-6 px-3">
+            <!-- Навигация -->
+            <nav class="mt-5 px-4">
                 <Link
-                    v-for="item in filteredNavigation"
+                    v-for="item in navigationItems"
                     :key="item.name"
                     :href="route(item.route)"
                     :class="[
+                        'flex items-center h-10 gap-3 px-3 rounded-lg text-sm mb-1 transition-colors',
                         isCurrentRoute(item.route)
-                            ? 'bg-blue-50 text-blue-600 shadow-sm'
-                            : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50/50',
-                        'flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative',
+                            ? 'bg-violet-50 text-violet-700'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900',
                     ]"
                 >
                     <component
                         :is="item.icon"
                         :class="[
+                            'w-5 h-5',
                             isCurrentRoute(item.route)
-                                ? 'text-blue-600'
-                                : 'text-slate-400 group-hover:text-blue-600',
-                            'w-5 h-5 mr-3 transition-colors',
+                                ? 'text-violet-600'
+                                : 'text-gray-400',
                         ]"
                     />
                     <span class="font-medium">{{ item.name }}</span>
 
-                    <!-- Badge -->
                     <div
                         v-if="item.badge"
-                        class="absolute right-4 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs font-semibold"
+                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full"
+                        :class="[
+                            isCurrentRoute(item.route)
+                                ? 'bg-violet-100 text-violet-700'
+                                : 'bg-gray-100 text-gray-600',
+                        ]"
                     >
                         {{ item.badge }}
                     </div>
-
-                    <ChevronRight
-                        class="ml-auto w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400"
-                    />
                 </Link>
             </nav>
 
-            <!-- Logout Button -->
-            <div
-                class="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100 bg-white/80 backdrop-blur-sm"
-            >
+            <!-- Разделитель -->
+            <div class="mx-4 my-4 border-t border-gray-100"></div>
+
+            <!-- Дополнительные пункты -->
+            <div class="px-4">
                 <Link
                     :href="route('logout')"
                     method="post"
                     as="button"
-                    class="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center justify-center gap-3 group shadow-lg shadow-blue-200/50 hover:shadow-blue-300/50"
+                    class="flex items-center h-10 gap-3 px-3 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 w-full"
                 >
-                    <LogOut
-                        class="w-4 h-4 transition-transform group-hover:-translate-x-1"
-                    />
-                    <span class="text-sm">Выход</span>
+                    <LogOut class="w-5 h-5 text-gray-400" />
+                    <span class="font-medium">Выход</span>
                 </Link>
             </div>
-        </div>
+        </aside>
 
-        <!-- Main Content Area -->
+        <!-- Основной контент -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
-            <header
-                class="bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm"
-            >
-                <div class="flex justify-between items-center h-16 px-6">
-                    <div class="flex items-center gap-4">
+            <!-- Шапка -->
+            <header class="h-16 bg-white shadow-sm">
+                <div class="h-full px-6 flex items-center justify-between">
+                    <!-- Левая часть -->
+                    <div class="flex items-center gap-8">
                         <button
                             @click="toggleSidebar"
-                            class="text-slate-500 hover:text-slate-700 lg:hidden"
+                            class="lg:hidden text-gray-400 hover:text-gray-600"
                         >
                             <Menu class="w-6 h-6" />
                         </button>
+
+                        <!-- Поиск -->
+                        <div class="hidden md:block relative">
+                            <Search
+                                class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Search for anything here..."
+                                class="pl-9 pr-4 py-2 w-[380px] bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow"
+                            />
+                        </div>
                     </div>
 
-                    <!-- Right Section with Notifications and Profile -->
-                    <div class="flex items-center gap-4">
-                        <!-- Notifications -->
+                    <!-- Правая часть -->
+                    <div class="flex items-center gap-6">
+                        <!-- Уведомления -->
                         <div class="relative notifications-dropdown">
                             <button
-                                class="relative p-2 text-slate-500 hover:text-slate-700 transition-colors rounded-lg hover:bg-slate-100"
                                 @click="toggleNotificationsDropdown"
+                                class="relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
                             >
                                 <Bell class="w-5 h-5" />
                                 <span
                                     v-if="unreadNotifications"
-                                    class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full notification-dot"
+                                    class="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full ring-2 ring-white"
                                 />
                             </button>
 
-                            <!-- Notifications Panel -->
-                            <Transition
-                                enter-active-class="transition duration-200 ease-out"
-                                enter-from-class="transform scale-95 opacity-0"
-                                enter-to-class="transform scale-100 opacity-100"
-                                leave-active-class="transition duration-75 ease-in"
-                                leave-from-class="transform scale-100 opacity-100"
-                                leave-to-class="transform scale-95 opacity-0"
+                            <!-- Панель уведомлений -->
+                            <div
+                                v-if="notificationsDropdownOpen"
+                                class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
                             >
-                                <div
-                                    v-if="notificationsDropdownOpen"
-                                    class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden"
-                                >
+                                <div class="p-4 border-b border-gray-100">
                                     <div
-                                        class="p-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-100"
+                                        class="flex justify-between items-center"
                                     >
-                                        <div
-                                            class="flex justify-between items-center"
+                                        <h3 class="font-semibold text-gray-900">
+                                            Уведомления
+                                        </h3>
+                                        <button
+                                            v-if="unreadNotifications"
+                                            @click="markAllNotificationsAsRead"
+                                            class="text-xs text-violet-600 hover:text-violet-700"
                                         >
-                                            <h3
-                                                class="font-semibold text-slate-800"
-                                            >
-                                                Уведомления
-                                            </h3>
-                                            <button
-                                                v-if="unreadNotifications"
-                                                @click="
-                                                    markAllNotificationsAsRead
-                                                "
-                                                class="text-xs text-blue-600 hover:text-blue-700"
-                                            >
-                                                Отметить все как прочитанные
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto"
-                                    >
-                                        <div
-                                            v-for="notification in notifications"
-                                            :key="notification.id"
-                                            class="p-4 hover:bg-slate-50 transition-colors cursor-pointer"
-                                            :class="{
-                                                'bg-blue-50/50':
-                                                    !notification.read,
-                                            }"
-                                        >
-                                            <div
-                                                class="flex justify-between items-start"
-                                            >
-                                                <p
-                                                    class="text-sm font-medium text-slate-800"
-                                                >
-                                                    {{ notification.title }}
-                                                </p>
-                                                <span
-                                                    class="text-xs text-slate-500"
-                                                    >{{
-                                                        notification.time
-                                                    }}</span
-                                                >
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        v-if="!notifications.length"
-                                        class="p-4 text-center text-sm text-slate-500"
-                                    >
-                                        Нет новых уведомлений
+                                            Отметить все как прочитанные
+                                        </button>
                                     </div>
                                 </div>
-                            </Transition>
+
+                                <div
+                                    class="divide-y divide-gray-100 max-h-[300px] overflow-y-auto"
+                                >
+                                    <div
+                                        v-for="notification in notifications"
+                                        :key="notification.id"
+                                        class="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                                        :class="{
+                                            'bg-violet-50': !notification.read,
+                                        }"
+                                    >
+                                        <p class="font-medium text-gray-900">
+                                            {{ notification.title }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            {{ notification.time }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Profile -->
+                        <!-- Разделитель -->
+                        <div class="h-6 w-px bg-gray-200"></div>
+
+                        <!-- Профиль -->
                         <div class="relative profile-dropdown">
                             <button
                                 @click="toggleProfileDropdown"
-                                class="flex items-center gap-3 focus:outline-none"
+                                class="flex items-center gap-3"
                             >
-                                <span class="hidden md:block text-right">
-                                    <p
-                                        class="text-sm font-medium text-slate-700"
-                                    >
-                                        {{ $page.props.user.email }}
-                                    </p>
-                                    <p class="text-xs text-slate-500">
-                                        Администратор
-                                    </p>
-                                </span>
                                 <div
-                                    class="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-offset-2 ring-blue-100 hover:ring-blue-200 transition-all"
+                                class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center"
                                 >
-                                    <img
-                                        class="h-full w-full object-cover"
-                                        src="https://images.unsplash.com/photo-1528892952291-009c663ce843?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=296&amp;q=80"
-                                        alt="Your avatar"
-                                    />
+                                    <span
+                                        class="text-sm font-medium text-violet-700"
+                                    >
+                                        {{
+                                            $page.props.user.email
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        }}
+                                    </span>
                                 </div>
                             </button>
 
-                            <!-- Profile Dropdown -->
-                            <Transition
-                                enter-active-class="transition duration-200 ease-out"
-                                enter-from-class="transform scale-95 opacity-0"
-                                enter-to-class="transform scale-100 opacity-100"
-                                leave-active-class="transition duration-75 ease-in"
-                                leave-from-class="transform scale-100 opacity-100"
-                                leave-to-class="transform scale-95 opacity-0"
+                            <div
+                                v-if="profileDropdownOpen"
+                                class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
                             >
+                                <!-- Шапка профиля -->
                                 <div
-                                    v-if="profileDropdownOpen"
-                                    class="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden"
+                                    class="p-4 bg-gray-50/50 border-b border-gray-100"
                                 >
-                                    <div
-                                        class="p-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-100"
-                                    >
-                                        <p class="text-xs text-slate-500">
-                                            Вы вошли как
-                                        </p>
-                                        <p
-                                            class="text-sm font-medium text-slate-800 truncate"
+                                    <div class="flex items-start gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center"
                                         >
-                                            {{ $page.props.user.email }}
-                                        </p>
-                                    </div>
-                                    <div class="p-2">
-                                        <Link
-                                            :href="route('logout')"
-                                            method="post"
-                                            class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg gap-3 transition-colors"
-                                        >
-                                            <LogOut class="w-4 h-4" />
-                                            <span>Выйти из системы</span>
-                                        </Link>
+                                            <span
+                                                class="text-sm font-medium text-violet-700"
+                                            >
+                                                {{
+                                                    $page.props.user.email
+                                                        .charAt(0)
+                                                        .toUpperCase()
+                                                }}
+                                            </span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p
+                                                class="text-sm font-medium text-gray-900 truncate"
+                                            >
+                                                {{ $page.props.user.email }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </Transition>
+
+                                <!-- Информация и статистика -->
+                                <div class="px-4 py-3 border-b border-gray-100">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p
+                                                class="text-xs font-medium text-gray-500"
+                                            >
+                                                ID пользователя
+                                            </p>
+                                            <p
+                                                class="text-sm font-medium text-violet-600 mt-0.5"
+                                            >
+                                                #{{ $page.props.user.identify }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-xs font-medium text-gray-500"
+                                            >
+                                                Последний вход
+                                            </p>
+                                            <p
+                                                class="text-sm text-gray-900 mt-0.5"
+                                            >
+                                                Сегодня, 14:23
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Действия -->
+                                <div class="p-2">
+                                    <!-- Настройки профиля -->
+                                    <Link
+                                        :href="route('dashboard')"
+                                        class="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group"
+                                    >
+                                        <Settings
+                                            class="w-4 h-4 mr-2 text-gray-400 group-hover:text-gray-600"
+                                        />
+                                        <span>Настройки профиля</span>
+                                    </Link>
+
+                                    <!-- Безопасность -->
+                                    <Link
+                                        :href="route('dashboard')"
+                                        class="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group"
+                                    >
+                                        <KeyRound
+                                            class="w-4 h-4 mr-2 text-gray-400 group-hover:text-gray-600"
+                                        />
+                                        <span>Безопасность</span>
+                                    </Link>
+
+                                    <!-- Разделитель -->
+                                    <div
+                                        class="h-px bg-gray-100 my-2 mx-2"
+                                    ></div>
+
+                                    <!-- Выход -->
+                                    <Link
+                                        :href="route('logout')"
+                                        method="post"
+                                        as="button"
+                                        class="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+                                    >
+                                        <LogOut
+                                            class="w-4 h-4 mr-2 text-red-500"
+                                        />
+                                        <span>Выйти из системы</span>
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content -->
+            <!-- Основной контент -->
             <main
-                class="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50 p-6"
+                class="flex-1 overflow-x-hidden overflow-y-auto bg-[#F7F7F9] p-6"
             >
                 <div class="max-w-7xl mx-auto">
                     <slot />
@@ -423,6 +448,31 @@ onUnmounted(() => {
     </div>
 </template>
 
-<style scoped>
-/* Скроллбар */
+<style>
+:root {
+    --violet-50: #f5f3ff;
+    --violet-100: #ede9fe;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --violet-700: #6d28d9;
+}
+
+/* Стили для скроллбара */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
 </style>

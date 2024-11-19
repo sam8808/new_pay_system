@@ -1,3 +1,242 @@
+<script setup>
+import { ref, onMounted, onUnmounted, defineProps } from "vue";
+
+// Состояния
+const isMobileMenuOpen = ref(false);
+const isScrolled = ref(false);
+const isVisible = ref(false);
+const isFeaturesVisible = ref(false);
+const isPricingVisible = ref(false);
+const isSupportVisible = ref(false);
+const isSubmitting = ref(false);
+
+defineProps({
+    title: String
+})
+
+// Форма и ошибки
+const form = ref({
+    name: '',
+    email: '',
+    message: ''
+});
+
+const formErrors = ref({});
+
+// Навигация
+const navigationLinks = [
+    { href: '#features', text: 'Возможности' },
+    { href: '#pricing', text: 'Тарифы' },
+    { href: '#support', text: 'Поддержка' }
+];
+
+// Особенности
+const features = [
+    {
+        title: 'Безопасность',
+        description: 'Защита данных по международным стандартам PCI DSS и шифрование всех транзакций',
+        icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+        bgColor: 'bg-blue-100',
+        iconColor: 'text-blue-600'
+    },
+    {
+        title: 'Быстрые переводы',
+        description: 'Мгновенные платежи и переводы между пользователями системы 24/7',
+        icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+        bgColor: 'bg-indigo-100',
+        iconColor: 'text-indigo-600'
+    },
+    {
+        title: 'Аналитика',
+        description: 'Детальная статистика и отчеты по всем операциям в реальном времени',
+        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+        bgColor: 'bg-violet-100',
+        iconColor: 'text-violet-600'
+    }
+];
+
+// Тарифные планы
+const pricingPlans = [
+    {
+        name: 'Старт',
+        price: '0₽',
+        features: [
+            'До 100 транзакций',
+            'Базовая аналитика',
+            'Email поддержка'
+        ],
+        buttonText: 'Выбрать',
+        popular: false
+    },
+    {
+        name: 'Бизнес',
+        price: '2999₽',
+        features: [
+            'Безлимитные транзакции',
+            'Расширенная аналитика',
+            '24/7 поддержка',
+            'API интеграция'
+        ],
+        buttonText: 'Выбрать',
+        popular: true
+    },
+    {
+        name: 'Корпоративный',
+        price: '9999₽',
+        features: [
+            'Все функции Бизнес',
+            'Персональный менеджер',
+            'Индивидуальные условия'
+        ],
+        buttonText: 'Связаться',
+        popular: false
+    }
+];
+
+// Контакты
+const contacts = [
+    {
+        title: 'Email поддержка',
+        value: 'support@paysystem.ru',
+        icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+    },
+    {
+        title: 'Телефон',
+        value: '8 800 100-20-30',
+        icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
+    }
+];
+
+// Социальные сети
+const socialLinks = [
+    { 
+        href: '#', 
+        icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22'
+    },
+    {
+        href: '#',
+        icon: 'M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z'
+    },
+    {
+        href: '#',
+        icon: 'M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M4 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z'
+    }
+];
+
+// Колонки футера
+const footerColumns = [
+    {
+        title: 'Продукт',
+        links: [
+            { text: 'Возможности', href: '#features' },
+            { text: 'Тарифы', href: '#pricing' },
+            { text: 'API', href: '#', external: true },
+            { text: 'Документация', href: '#' }
+        ]
+    },
+    {
+        title: 'Компания',
+        links: [
+            { text: 'О нас', href: '#' },
+            { text: 'Блог', href: '#' },
+            { text: 'Карьера', href: '#' },
+            { text: 'Контакты', href: '#' }
+        ]
+    },
+    {
+        title: 'Безопасность',
+        links: [
+            { text: 'Центр безопасности', href: '#' },
+            { text: 'PCI DSS', href: '#', external: true },
+            { text: 'SSL Сертификация', href: '#' },
+            { text: 'Правовая информация', href: '#' }
+        ]
+    }
+];
+
+// Правовые ссылки
+const legalLinks = [
+    { text: 'Условия использования', href: '#' },
+    { text: 'Конфиденциальность', href: '#' }
+];
+
+// Методы
+const handleScroll = () => {
+    isScrolled.value = window.scrollY > 0;
+};
+
+const smoothScroll = (target) => {
+    const element = document.querySelector(target);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+    isMobileMenuOpen.value = false;
+};
+
+const handleSubmit = async () => {
+    formErrors.value = {};
+    isSubmitting.value = true;
+
+    // Валидация
+    if (!form.value.name) formErrors.value.name = 'Введите ваше имя';
+    if (!form.value.email) formErrors.value.email = 'Введите email';
+    if (!form.value.message) formErrors.value.message = 'Введите сообщение';
+
+    if (Object.keys(formErrors.value).length === 0) {
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Имитация запроса
+            form.value = { name: '', email: '', message: '' };
+            // Здесь можно добавить уведомление об успешной отправке
+        } catch (error) {
+            // Обработка ошибок
+        }
+    }
+
+    isSubmitting.value = false;
+};
+
+// Наблюдатель за видимостью секций
+const createIntersectionObserver = (callback) => {
+    return new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    callback(true);
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+};
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+
+    // Инициализация наблюдателей
+    const heroSection = document.querySelector('section');
+    const featuresSection = document.querySelector('#features');
+    const pricingSection = document.querySelector('#pricing');
+   const supportSection = document.querySelector('#support');
+
+if (heroSection) {
+    createIntersectionObserver(() => isVisible.value = true).observe(heroSection);
+}
+if (featuresSection) {
+    createIntersectionObserver(() => isFeaturesVisible.value = true).observe(featuresSection);
+}
+if (pricingSection) {
+    createIntersectionObserver(() => isPricingVisible.value = true).observe(pricingSection);
+}
+if (supportSection) {
+    createIntersectionObserver(() => isSupportVisible.value = true).observe(supportSection);
+}
+});
+
+onUnmounted(() => {
+window.removeEventListener('scroll', handleScroll);
+});
+</script>
+
 <template>
     <Head :title="title" />
     <div
@@ -539,246 +778,6 @@
         </footer>
     </div>
 </template>
-
-<script setup>
-import { ref, onMounted, onUnmounted, defineProps } from "vue";
-import { Link } from "@inertiajs/vue3";
-
-// Состояния
-const isMobileMenuOpen = ref(false);
-const isScrolled = ref(false);
-const isVisible = ref(false);
-const isFeaturesVisible = ref(false);
-const isPricingVisible = ref(false);
-const isSupportVisible = ref(false);
-const isSubmitting = ref(false);
-
-defineProps({
-    title: String
-})
-
-// Форма и ошибки
-const form = ref({
-    name: '',
-    email: '',
-    message: ''
-});
-
-const formErrors = ref({});
-
-// Навигация
-const navigationLinks = [
-    { href: '#features', text: 'Возможности' },
-    { href: '#pricing', text: 'Тарифы' },
-    { href: '#support', text: 'Поддержка' }
-];
-
-// Особенности
-const features = [
-    {
-        title: 'Безопасность',
-        description: 'Защита данных по международным стандартам PCI DSS и шифрование всех транзакций',
-        icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
-        bgColor: 'bg-blue-100',
-        iconColor: 'text-blue-600'
-    },
-    {
-        title: 'Быстрые переводы',
-        description: 'Мгновенные платежи и переводы между пользователями системы 24/7',
-        icon: 'M13 10V3L4 14h7v7l9-11h-7z',
-        bgColor: 'bg-indigo-100',
-        iconColor: 'text-indigo-600'
-    },
-    {
-        title: 'Аналитика',
-        description: 'Детальная статистика и отчеты по всем операциям в реальном времени',
-        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-        bgColor: 'bg-violet-100',
-        iconColor: 'text-violet-600'
-    }
-];
-
-// Тарифные планы
-const pricingPlans = [
-    {
-        name: 'Старт',
-        price: '0₽',
-        features: [
-            'До 100 транзакций',
-            'Базовая аналитика',
-            'Email поддержка'
-        ],
-        buttonText: 'Выбрать',
-        popular: false
-    },
-    {
-        name: 'Бизнес',
-        price: '2999₽',
-        features: [
-            'Безлимитные транзакции',
-            'Расширенная аналитика',
-            '24/7 поддержка',
-            'API интеграция'
-        ],
-        buttonText: 'Выбрать',
-        popular: true
-    },
-    {
-        name: 'Корпоративный',
-        price: '9999₽',
-        features: [
-            'Все функции Бизнес',
-            'Персональный менеджер',
-            'Индивидуальные условия'
-        ],
-        buttonText: 'Связаться',
-        popular: false
-    }
-];
-
-// Контакты
-const contacts = [
-    {
-        title: 'Email поддержка',
-        value: 'support@paysystem.ru',
-        icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
-    },
-    {
-        title: 'Телефон',
-        value: '8 800 100-20-30',
-        icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
-    }
-];
-
-// Социальные сети
-const socialLinks = [
-    { 
-        href: '#', 
-        icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22'
-    },
-    {
-        href: '#',
-        icon: 'M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z'
-    },
-    {
-        href: '#',
-        icon: 'M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M4 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z'
-    }
-];
-
-// Колонки футера
-const footerColumns = [
-    {
-        title: 'Продукт',
-        links: [
-            { text: 'Возможности', href: '#features' },
-            { text: 'Тарифы', href: '#pricing' },
-            { text: 'API', href: '#', external: true },
-            { text: 'Документация', href: '#' }
-        ]
-    },
-    {
-        title: 'Компания',
-        links: [
-            { text: 'О нас', href: '#' },
-            { text: 'Блог', href: '#' },
-            { text: 'Карьера', href: '#' },
-            { text: 'Контакты', href: '#' }
-        ]
-    },
-    {
-        title: 'Безопасность',
-        links: [
-            { text: 'Центр безопасности', href: '#' },
-            { text: 'PCI DSS', href: '#', external: true },
-            { text: 'SSL Сертификация', href: '#' },
-            { text: 'Правовая информация', href: '#' }
-        ]
-    }
-];
-
-// Правовые ссылки
-const legalLinks = [
-    { text: 'Условия использования', href: '#' },
-    { text: 'Конфиденциальность', href: '#' }
-];
-
-// Методы
-const handleScroll = () => {
-    isScrolled.value = window.scrollY > 0;
-};
-
-const smoothScroll = (target) => {
-    const element = document.querySelector(target);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    }
-    isMobileMenuOpen.value = false;
-};
-
-const handleSubmit = async () => {
-    formErrors.value = {};
-    isSubmitting.value = true;
-
-    // Валидация
-    if (!form.value.name) formErrors.value.name = 'Введите ваше имя';
-    if (!form.value.email) formErrors.value.email = 'Введите email';
-    if (!form.value.message) formErrors.value.message = 'Введите сообщение';
-
-    if (Object.keys(formErrors.value).length === 0) {
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Имитация запроса
-            form.value = { name: '', email: '', message: '' };
-            // Здесь можно добавить уведомление об успешной отправке
-        } catch (error) {
-            // Обработка ошибок
-        }
-    }
-
-    isSubmitting.value = false;
-};
-
-// Наблюдатель за видимостью секций
-const createIntersectionObserver = (callback) => {
-    return new IntersectionObserver(
-        (entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    callback(true);
-                }
-            });
-        },
-        { threshold: 0.1 }
-    );
-};
-
-onMounted(() => {
-    window.addEventListener('scroll', handleScroll);
-
-    // Инициализация наблюдателей
-    const heroSection = document.querySelector('section');
-    const featuresSection = document.querySelector('#features');
-    const pricingSection = document.querySelector('#pricing');
-   const supportSection = document.querySelector('#support');
-
-if (heroSection) {
-    createIntersectionObserver(() => isVisible.value = true).observe(heroSection);
-}
-if (featuresSection) {
-    createIntersectionObserver(() => isFeaturesVisible.value = true).observe(featuresSection);
-}
-if (pricingSection) {
-    createIntersectionObserver(() => isPricingVisible.value = true).observe(pricingSection);
-}
-if (supportSection) {
-    createIntersectionObserver(() => isSupportVisible.value = true).observe(supportSection);
-}
-});
-
-onUnmounted(() => {
-window.removeEventListener('scroll', handleScroll);
-});
-</script>
 
 <style>
 /* Базовые анимации */

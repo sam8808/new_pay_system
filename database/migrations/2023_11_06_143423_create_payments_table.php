@@ -20,9 +20,12 @@ return new class extends Migration {
             $table->decimal('amount_default_currency')->default(0);
             $table->string('currency');
             $table->string('order');
+            $table->string('user_identify')->nullable();
+
 
             $table->bigInteger('payment_system')->unsigned()->nullable();
-            $table->string('pay_screen')->nullable();
+            $table->string('identify')->nullable();
+            $table->string('receipt')->nullable();
 
             $table->boolean('approved')->default(false);
             $table->boolean('canceled')->default(false);

@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use App\Models\Merchant;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -19,9 +20,12 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'identify',
         'email',
         'password',
-        'is_active'
+        'is_active',
+        'referrer_id',
+        'last_login_at',
     ];
 
     /**
@@ -43,19 +47,29 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_active' => 'boolean',
+        'last_login_at' => 'datetime',
     ];
 
-    /**
-     * @return HasMany
-     */
+
+
+
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referrer_id', 'id');
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(User::class, 'referrer_id', 'id');
+    }
+
+
     public function merchants(): HasMany
     {
         return $this->hasMany(Merchant::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
+
     public function withdrawals(): HasMany
     {
         return $this->hasMany(Withdrawal::class, 'user_id');

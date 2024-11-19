@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\PaymentSystem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PSInfo extends Model
+class PaymentSystemDetail extends Model
 {
     use HasFactory;
 
@@ -29,12 +30,8 @@ class PSInfo extends Model
     ];
 
 
-    /**
-     * @return BelongsTo
-     */
     public function paymentSystem(): BelongsTo
     {
         return $this->belongsTo(PaymentSystem::class, 'ps_id');
     }
-
 }

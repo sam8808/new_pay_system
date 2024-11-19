@@ -2,73 +2,66 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use Inertia\Inertia;
 use App\Models\Merchant;
 use Illuminate\Http\Request;
 use App\Services\MerchantService;
-use Illuminate\Contracts\View\View;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+
 
 class MerchantController extends Controller
 {
-    /**
-     * @return View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-     */
-    public function index(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+
+    public function index()
     {
-        $merchants = Merchant::where('user_id', auth()->user()->id)
+        $merchants = Merchant::where('user_id', Auth::user()->id)
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        return view('merchant.index', ['merchants' => $merchants]);
+        return Inertia::render('Dashboard/Merchant/Index', [
+            'merchants' => $merchants
+        ]);
     }
 
 
-    /**
-     * @param $id
-     * @return View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-     */
-    public function show($id): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+
+    public function show($id)
     {
         $merchant = Merchant::find($id);
 
-        return view('merchant.show', ['merchant' => $merchant]);
+        return Inertia::render('Dashboard/Merchant/Show', [
+            'merchant' => $merchant
+        ]);
     }
 
-    /**
-     * @return View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-     */
-    public function create(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+
+    public function create()
     {
-        return view('merchant.create');
+        return Inertia::render('Dashboard/Merchant/Create');
     }
 
 
-    /**
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $service = new MerchantService($request);
         $merchant = $service->validate()->create();
 
-        return redirect()->to(route('merchant.show', [$merchant->id]));
+        return Redirect::route('merchant.show', [$merchant->id]);
     }
 
 
-    /**
-     * @param $id
-     * @return View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-     */
-    public function edit($id): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+
+    public function edit($id)
     {
         $merchant = Merchant::find($id);
 
-        return view('merchant.edit', ['merchant' => $merchant]);
+        return Inertia::render('Dashboard/Merchant/Edit', [
+            'merchant' => $merchant
+        ]);
     }
+
 
     public function update(Request $request, $id)
     {
@@ -79,11 +72,8 @@ class MerchantController extends Controller
     }
 
 
-    /**
-     * @param $id
-     * @return RedirectResponse
-     */
-    public function activateOrDeactivate($id): RedirectResponse
+
+    public function activateOrDeactivate($id)
     {
         $merchant = Merchant::find($id);
         $merchant->activated = !$merchant->activated;
@@ -92,11 +82,8 @@ class MerchantController extends Controller
         return back();
     }
 
-    /**
-     * @param $id
-     * @return RedirectResponse
-     */
-    public function destroy($id): RedirectResponse
+
+    public function destroy($id)
     {
         $merchant = Merchant::find($id);
         $merchant->delete();

@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\PaymentSystem;
-use App\Models\PSInfo;
-use App\Services\FileUploadService;
 use Illuminate\Http\Request;
+use App\Models\PaymentSystem;
+use App\Models\PaymentSystemDetail;
+use App\Services\FileUploadService;
 
 
 
@@ -62,9 +62,9 @@ class PaymentSystemService
         ]);
     }
 
-    public function createInfo()
+    public function createDetail()
     {
-        PSInfo::create([
+        PaymentSystemDetail::create([
             'ps_id' => intval($this->request->post('ps_id')),
             'title' => $this->request->post('title'),
             'value' => $this->request->post('value'),

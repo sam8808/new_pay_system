@@ -53,6 +53,6 @@ Route::middleware('guest')->group(function () {
 
     //     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    Route::post('logout', [LoginController::class, 'logout'])
-        ->name('logout');
 });
+Route::post('logout', [LoginController::class, 'logout'])
+    ->name('logout');

@@ -30,13 +30,13 @@ class LoginController extends Controller
             return Redirect::back()->withErrors($service->getErrors());
         }
 
-        return $service->responseSuccess();
+        return Redirect::route('dashboard');
     }
 
     public function logout()
     {
         Auth::logout();
 
-        return redirect()->route('home');
+        return Redirect::route('home');
     }
 }
