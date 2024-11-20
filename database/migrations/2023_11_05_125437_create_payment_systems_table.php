@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('url');
             $table->string('logo');
             $table->string('currency');
-            $table->boolean('activated', )->default(true);
+            $table->boolean('has_withdrawal')->default(false);
+            $table->boolean('activated',)->default(true);
             $table->timestamps();
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use Inertia\Inertia;
 use App\Models\Merchant;
 use App\Models\Withdrawal;
 use App\Models\Transaction;
@@ -9,16 +10,20 @@ use Illuminate\Http\Request;
 use App\Models\PaymentSystem;
 use App\Services\ExchangeService;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 class WithdrawalController extends Controller
 {
     public function create()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $merchants = $user->merchants->where('balance', '>', 0);
-        $paymentSystems = PaymentSystem::all();
+        $paymentSystems = PaymentSystem::where('has_withdrawal', true)
+            ->get();
 
-        return view('user.withdrawal.create', [
+
+        return Inertia::render('Dashboard/Withdrawal/Create', [
             'merchants' => $merchants,
             'paymentSystems' => $paymentSystems,
         ]);
@@ -66,7 +71,7 @@ class WithdrawalController extends Controller
 
 
         $withdrawal = Withdrawal::create([
-            'user_id' => auth()->user()->id,
+            'user_id' => Auth::user()->id,
             'payment_system' => $paymentSystem->id,
             'details' => $request->post('details'),
             'amount' => $amountCurrentCurrency,
@@ -84,6 +89,6 @@ class WithdrawalController extends Controller
             'withdrawal_id' => $withdrawal->id,
         ]);
 
-        return back()->with(['success' => __('Запрос на вывод средств отправлен на модерацию')]);
+        return Redirect::back()->with(['success' => __('Запрос на вывод средств отправлен на модерацию')]);
     }
 }

@@ -26,7 +26,6 @@ const navigationItems = [
         name: "Главная",
         route: "dashboard",
         icon: LayoutDashboard,
-        badge: 3,
     },
     {
         name: "Транзакции",
@@ -39,18 +38,14 @@ const navigationItems = [
         icon: Building,
     },
     {
-        name: "Платежи",
-        route: "dashboard",
+        name: "Вывод средств",
+        route: "withdrawal",
         icon: CreditCard,
-    },
-    {
-        name: "Настройки",
-        route: "dashboard",
-        icon: Settings,
+        badge: 3,
     },
     {
         name: "Партнерам",
-        route: "dashboard",
+        route: "partners",
         icon: Users,
     },
 ];
@@ -150,15 +145,12 @@ onUnmounted(() => {
                 <div
                     class="w-9 h-9 bg-violet-600 rounded-lg flex items-center justify-center"
                 >
-                    <span class="text-white font-bold">L</span>
+                    <span class="text-white font-bold">PS</span>
                 </div>
                 <div class="flex flex-col">
-                    <div class="font-semibold text-gray-900">Logo</div>
-                    <div class="text-xs text-gray-500">Digital Market V1</div>
+                    <div class="font-semibold text-gray-900">Payment System</div>
+                    <!-- <div class="text-xs text-gray-500">Digital Market V1</div> -->
                 </div>
-                <button class="ml-auto text-gray-400">
-                    <component :is="Menu" class="w-5 h-5" />
-                </button>
             </div>
 
             <!-- Навигация -->
@@ -229,79 +221,10 @@ onUnmounted(() => {
                         >
                             <Menu class="w-6 h-6" />
                         </button>
-
-                        <!-- Поиск -->
-                        <div class="hidden md:block relative">
-                            <Search
-                                class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Search for anything here..."
-                                class="pl-9 pr-4 py-2 w-[380px] bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow"
-                            />
-                        </div>
                     </div>
 
                     <!-- Правая часть -->
                     <div class="flex items-center gap-6">
-                        <!-- Уведомления -->
-                        <div class="relative notifications-dropdown">
-                            <button
-                                @click="toggleNotificationsDropdown"
-                                class="relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                <Bell class="w-5 h-5" />
-                                <span
-                                    v-if="unreadNotifications"
-                                    class="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full ring-2 ring-white"
-                                />
-                            </button>
-
-                            <!-- Панель уведомлений -->
-                            <div
-                                v-if="notificationsDropdownOpen"
-                                class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
-                            >
-                                <div class="p-4 border-b border-gray-100">
-                                    <div
-                                        class="flex justify-between items-center"
-                                    >
-                                        <h3 class="font-semibold text-gray-900">
-                                            Уведомления
-                                        </h3>
-                                        <button
-                                            v-if="unreadNotifications"
-                                            @click="markAllNotificationsAsRead"
-                                            class="text-xs text-violet-600 hover:text-violet-700"
-                                        >
-                                            Отметить все как прочитанные
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="divide-y divide-gray-100 max-h-[300px] overflow-y-auto"
-                                >
-                                    <div
-                                        v-for="notification in notifications"
-                                        :key="notification.id"
-                                        class="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                                        :class="{
-                                            'bg-violet-50': !notification.read,
-                                        }"
-                                    >
-                                        <p class="font-medium text-gray-900">
-                                            {{ notification.title }}
-                                        </p>
-                                        <p class="text-sm text-gray-500 mt-1">
-                                            {{ notification.time }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Разделитель -->
                         <div class="h-6 w-px bg-gray-200"></div>
 
@@ -312,7 +235,7 @@ onUnmounted(() => {
                                 class="flex items-center gap-3"
                             >
                                 <div
-                                class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center"
+                                    class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center"
                                 >
                                     <span
                                         class="text-sm font-medium text-violet-700"

@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Models\Merchant;
 use App\Models\Payment;
-use App\Models\PaymentSystem;
+use App\Models\Merchant;
 use App\Models\Transaction;
-use App\Services\FileUploadService;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Models\PaymentSystem;
+use Illuminate\Http\JsonResponse;
+use App\Services\FileUploadService;
+use Illuminate\Contracts\View\View;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Application;
 use Illuminate\Validation\ValidationException;
 
 class ApiController extends Controller

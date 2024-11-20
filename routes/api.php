@@ -1,8 +1,8 @@
 <?php
 
 
-use App\Http\Controllers\ApiController;
-use App\Http\Controllers\ApiHandlerController;
+use App\Http\Controllers\API\ApiController;
+use App\Http\Controllers\API\ApiHandlerController;
 use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 

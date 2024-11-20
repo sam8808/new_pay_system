@@ -20,6 +20,9 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
     Route::get('{id}/transaction', [MainController::class, 'transaction'])
         ->name('transaction');
 
+    Route::get('partners', [MainController::class, 'partners'])
+        ->name('partners');
+
     Route::prefix('profile')->group(function () {
         Route::get('', [ProfileController::class, 'edit'])
             ->name('profile.edit');
@@ -61,11 +64,11 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
     });
 
     Route::prefix('withdrawal')->group(function () {
-        Route::get('create', [WithdrawalController::class, 'create'])
-            ->name('user.withdrawal.create');
+        Route::get('', [WithdrawalController::class, 'create'])
+            ->name('withdrawal');
 
-        Route::post('store', [WithdrawalController::class, 'store'])
-            ->name('user.withdrawal.store');
+        Route::post('', [WithdrawalController::class, 'store'])
+            ->name('withdrawal.store');
     });
 
     Route::get('orders', [OrderController::class, 'index'])

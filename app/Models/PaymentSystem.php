@@ -21,6 +21,7 @@ class PaymentSystem extends Model
         'url',
         'logo',
         'currency',
+        'has_withdrawal',
         'activated',
     ];
 
@@ -29,6 +30,7 @@ class PaymentSystem extends Model
      */
     protected $casts = [
         'activated' => 'boolean',
+        'has_withdrawal' => 'boolean',
     ];
 
     /**
