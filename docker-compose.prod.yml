@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: "./docker/8.3"
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: "${WWWGROUP}"
+    image: "sail-8.3/app"
+    container_name: finsystem_app
+    restart: unless-stopped
+    environment:
+      WWWUSER: "${WWWUSER}"
+    volumes:
+      - ".:/var/www/html"
+      - "./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini"
+    networks:
+      - app_network
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:alpine
+    container_name: finsystem_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ".:/var/www/html"
+      - "./docker/nginx/conf.d:/etc/nginx/conf.d"
+      - "./docker/nginx/ssl:/etc/nginx/ssl"
+    networks:
+      - app_network
+    depends_on:
+      - app
+
+  mysql:
+    image: "mysql/mysql-server:8.0"
+    container_name: finsystem_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - "dbdata:/var/lib/mysql"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+      retries: 3
+      timeout: 5s
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
