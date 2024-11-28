@@ -13,9 +13,8 @@ class ApiService
 
     public function __construct(
         public readonly Request  $request,
-        public readonly Merchant $merchant)
-    {
-    }
+        public readonly Merchant $merchant
+    ) {}
 
 
     /**
@@ -27,7 +26,7 @@ class ApiService
             'shop' => ['required'],
             'order' => ['required'],
             'amount' => ['required', 'numeric'],
-			'username' => ['required'],
+            'user_identify' => ['required'],
             'currency' => ['required'],
             'signature' => ['required'],
         ]);;
@@ -39,7 +38,7 @@ class ApiService
      */
     public function verifyHash(): bool
     {
-        return $this->getHash($this->merchant) === $this->request->post('signature') || $this->request->get('signature');
+        return $this->getHash() === $this->request->post('signature') || $this->request->get('signature');
     }
 
     /**

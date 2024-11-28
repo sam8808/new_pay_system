@@ -4,66 +4,44 @@
 
 @section('content')
 <div class="min-h-screen relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-50 via-slate-100 to-slate-200">
-    <!-- Enhanced Enterprise-Grade Header -->
-    <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white py-8 lg:py-12 relative overflow-hidden">
-        <!-- Refined animated background pattern -->
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\" 30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z\" fill=\"rgba(255,255,255,0.05)\"%3E%3C/path%3E%3C/svg%3E')] opacity-20 animate-[pulse_4s_ease-in-out_infinite]"></div>
+    <!-- Enhanced Professional Header -->
+    <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white py-6 lg:py-8 relative overflow-hidden">
+        <!-- Subtle animated background pattern -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\" 30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z\" fill=\"rgba(255,255,255,0.05)\"%3E%3C/path%3E%3C/svg%3E')] opacity-20"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div class="relative">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="flex -space-x-1">
-                            @foreach(['visa', 'mastercard', 'mir'] as $card)
-                            <div class="w-12 h-8 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10 flex items-center justify-center transform hover:translate-y-[-2px] transition-all duration-300">
-                                <img src="{{ asset('images/cards/' . $card . '.svg') }}" alt="{{ $card }}" class="h-4">
-                            </div>
-                            @endforeach
-                        </div>
-                        <div class="h-6 w-px bg-white/20"></div>
-                        <div class="flex items-center px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-[pulse_2s_ease-in-out_infinite] mr-2"></span>
-                            <span class="text-emerald-400 text-sm font-medium">{{ __('Система активна') }}</span>
-                        </div>
-                    </div>
-
-                    <h1 class="text-4xl lg:text-5xl font-light tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80 mb-2">
+                    <h1 class="text-3xl lg:text-4xl font-extralight tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
                         {{ __('Безопасный платеж') }}
                     </h1>
-
-                    <div class="flex items-center gap-6">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                            <span class="text-slate-300">{{ __('Защита SSL') }}</span>
+                    <div class="flex items-center mt-2 space-x-2">
+                        <div class="flex space-x-1">
+                            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-[pulse_2s_ease-in-out_infinite]"></span>
+                            <span class="w-2 h-2 bg-emerald-400/60 rounded-full animate-[pulse_2s_ease-in-out_infinite_200ms]"></span>
+                            <span class="w-2 h-2 bg-emerald-400/30 rounded-full animate-[pulse_2s_ease-in-out_infinite_400ms]"></span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span class="text-slate-300">{{ __('3D-Secure') }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            <span class="text-slate-300">{{ __('PCI DSS') }}</span>
-                        </div>
+                        <p class="text-slate-400 text-sm">{{ __('Защищенная транзакция') }}</p>
                     </div>
                 </div>
 
-                <!-- Enhanced Security Status -->
-                <div class="flex items-center gap-6">
-                    <div class="hidden lg:block h-16 w-px bg-gradient-to-b from-transparent via-slate-700/50 to-transparent"></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex flex-col items-center p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
-                            <div class="text-emerald-400 font-mono text-lg">256-bit</div>
-                            <div class="text-xs text-slate-400">{{ __('Шифрование') }}</div>
+                <div class="flex items-center gap-4 sm:gap-6">
+                    <div class="hidden sm:block h-12 lg:h-16 w-px bg-gradient-to-b from-transparent via-slate-700/50 to-transparent"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="relative group">
+                            <div class="absolute inset-0 bg-emerald-400/20 rounded-xl blur-xl transition-all group-hover:bg-emerald-400/30 
+                                duration-500"></div>
+                            <div class="relative w-10 h-10 rounded-xl bg-slate-800/80 backdrop-blur-xl flex items-center justify-center
+                                border border-white/5 transition-transform duration-300 group-hover:scale-110">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
                         </div>
-                        <div class="flex flex-col items-center p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
-                            <div class="text-emerald-400 font-mono text-lg">99.9%</div>
-                            <div class="text-xs text-slate-400">{{ __('Uptime') }}</div>
+                        <div>
+                            <span class="text-sm text-emerald-400 font-medium">SSL 3.0</span>
+                            <span class="block text-xs text-slate-500">256-bit</span>
                         </div>
                     </div>
                 </div>
@@ -72,39 +50,33 @@
     </div>
 
     <!-- Enhanced Main Content Area -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
-        <!-- Merchant Info with Premium Glass Effect -->
-        <div class="relative -mt-16 sm:-mt-20 mb-12">
-            <div class="inline-flex flex-wrap sm:flex-nowrap items-center gap-6 bg-white/95 backdrop-blur-2xl 
-                        rounded-2xl px-6 sm:px-8 py-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/20">
-                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-0.5 shrink-0 
-                           shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-                    <div class="w-full h-full rounded-lg bg-white flex items-center justify-center p-3 
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12">
+        <!-- Merchant Info with Enhanced Glass Effect -->
+        <div class="relative -mt-12 sm:-mt-16 mb-8 sm:mb-12">
+            <div class="inline-flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 bg-white/90 backdrop-blur-2xl 
+                        rounded-2xl px-4 sm:px-8 py-4 shadow-[0_8px_16px_rgba(0,0,0,0.08)] border border-white/20
+                        hover:shadow-[0_12px_24px_rgba(0,0,0,0.12)] transition-all duration-500
+                        before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/80 before:to-white/20 before:rounded-2xl before:-z-10">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-0.5 shrink-0 
+                           shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                    <div class="w-full h-full rounded-lg bg-white flex items-center justify-center p-2 
                                transition-transform duration-300 hover:scale-105">
                         <img src="{{ asset('storage/' . $shop->logo) }}" alt="{{ $shop->title }}"
                             class="max-w-full max-h-full object-contain">
                     </div>
                 </div>
-                <div class="flex flex-wrap sm:flex-nowrap items-center gap-6 sm:divide-x divide-slate-200">
-                    <div>
-                        <span class="block text-sm text-slate-500 mb-1">{{ __('Вам выставлен счет от') }}
-                            <span class="text-xl text-emerald-600 font-medium">{{ $shop->title }}</span>
-                        </span>
-                    </div>
-                    <div class="pl-0 sm:pl-6 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center
-                                  shadow-[0_2px_8px_rgba(16,185,129,0.2)]">
-                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:divide-x divide-slate-200">
+                    <span class="text-slate-800 font-medium">{{ $shop->title }}</span>
+                    <div class="flex items-center pl-0 sm:pl-6">
+                        <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center mr-2
+                                  shadow-[0_2px_4px_rgba(16,185,129,0.1)]">
+                            <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                             </svg>
                         </div>
-                        <div>
-                            <span class="block text-sm text-emerald-700 font-medium">
-                                {{ __('Верифицированный продавец') }}
-                            </span>
-                            <span class="text-xs text-slate-500">{{ $shop->base_url }}</span>
-                        </div>
+                        <span class="text-sm text-emerald-700 font-medium whitespace-nowrap">
+                            {{ __('Верифицированный продавец') }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -177,26 +149,28 @@
                         <label class="relative block cursor-pointer">
                             <input type="radio" name="payment_system" value="{{ $paymentSystem->id }}" class="peer sr-only" />
                             <div class="relative bg-white p-4 rounded-xl border-2 border-slate-200 
-                transition-all duration-300
-                hover:border-slate-300 hover:shadow-lg
-                peer-checked:border-emerald-500 peer-checked:bg-emerald-100 peer-checked:shadow-xl peer-checked:-translate-y-1">
+                                      transition-all duration-300
+                                      hover:border-slate-300 hover:shadow-lg
+                                      peer-checked:border-slate-900 peer-checked:shadow-xl peer-checked:-translate-y-1">
                                 <div class="flex items-start gap-3">
-                                    <!-- Логотип -->
+                                    <!-- Logo -->
                                     <div class="shrink-0 w-10 h-10 rounded-lg bg-slate-50 p-2">
                                         <img src="{{ asset('storage/' . $paymentSystem->logo) }}"
                                             alt="{{ $paymentSystem->title }}"
                                             class="w-full h-full object-contain" />
                                     </div>
 
-                                    <!-- Контент -->
+                                    <!-- Content -->
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center justify-between mb-1">
                                             <h4 class="text-sm font-medium text-slate-900 truncate pr-2">
                                                 {{ $paymentSystem->title }}
                                             </h4>
-                                            <!-- Круг с галочкой -->
-                                            <div class="relative w-5 h-5">
-                                                <svg class="absolute w-4 h-4 text-emerald-600"
+                                            <div class="w-4 h-4 rounded-full border-2 border-slate-300 
+                                                      peer-checked:border-slate-900 peer-checked:bg-slate-900 
+                                                      transition-colors">
+                                                <svg class="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 
+                                                          transition-opacity"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M5 13l4 4L19 7" />
@@ -207,19 +181,21 @@
                                             {{ $paymentSystem->description }}
                                         </p>
 
-                                        <!-- Дополнительные фичи -->
+                                        <!-- Features -->
                                         <div class="flex items-center gap-2 mt-2">
                                             <span class="inline-flex items-center text-emerald-600 text-[10px] bg-emerald-50 
-                                px-1.5 py-0.5 rounded-full">
-                                                <svg class="w-2.5 h-2.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                       px-1.5 py-0.5 rounded-full">
+                                                <svg class="w-2.5 h-2.5 mr-0.5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M5 13l4 4L19 7" />
                                                 </svg>
                                                 {{ __('Быстро') }}
                                             </span>
                                             <span class="inline-flex items-center text-emerald-600 text-[10px] bg-emerald-50 
-                                px-1.5 py-0.5 rounded-full">
-                                                <svg class="w-2.5 h-2.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                       px-1.5 py-0.5 rounded-full">
+                                                <svg class="w-2.5 h-2.5 mr-0.5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                 </svg>
@@ -230,10 +206,8 @@
                                 </div>
                             </div>
                         </label>
-
                         @endforeach
                     </div>
-
 
                     @error('payment_system')
                     <div class="rounded-lg bg-red-50 border border-red-100 p-4">

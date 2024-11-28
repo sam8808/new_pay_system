@@ -9,7 +9,7 @@ use App\Http\Controllers\Dashboard\WithdrawalController;
 
 
 
-Route::prefix('dashboard')->middleware('auth')->group(function () {
+Route::prefix('account')->middleware('auth')->group(function () {
 
     Route::get('', [MainController::class, 'index'])
         ->name('dashboard');

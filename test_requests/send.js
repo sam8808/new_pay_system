@@ -1,66 +1,206 @@
 import http from 'http';
-import querystring from 'querystring';
 import crypto from 'crypto';
 
-function sha256(input) {
-    const hash = crypto.createHash('sha256');
-    hash.update(input);
-    return hash.digest('hex');
-}
+class PaymentApiTest {
+    constructor() {
+        // Базовая конфигурация
+        this.config = {
+            host: '127.0.0.1',
+            port: 8000,
+            path: '/api',
+            merchantId: '173209465',
+            secretKey: 'bb4c351b088e7f615a8230111424e76a'
+        };
+    }
 
-function test() {
-    const shop = '619807101945';
-    const order = '1';
-    const amount = (1250).toFixed(2);
-    const currency = 'RUB';
-    const key = '%JMlzywPF4Fgw?mpksIsI%3N8CcIsaJO';
+    // Генерация подписи для запроса
+    generateSignature(data) {
+        const hashString = [
+            data.shop,
+            data.order,
+            data.amount,
+            data.currency,
+            this.config.secretKey
+        ].join(':');
 
-    const data = [shop, order, amount, currency, key];
+        return crypto.createHash('sha256')
+            .update(hashString)
+            .digest('hex')
+            .toUpperCase();
+    }
 
-    const hashString = data.join(':');
-    const hashedValue = sha256(hashString);
+    // Создание тестового платежного запроса
+    createPaymentRequest(customData = {}) {
+        const defaultData = {
+            shop: this.config.merchantId,
+            order: '1',
+            amount: '1250.00',
+            currency: 'RUB',
+            username: 'testuser',
+            handler: 'process'
+        };
 
-    const signature = hashedValue.toUpperCase();
+        const data = { ...defaultData, ...customData };
+        data.signature = this.generateSignature(data);
 
-    const url = 'http://127.0.0.1:8000/merchant/handler'; // Замените на URL вашего обработчика
+        return data;
+    }
 
-    const formData = querystring.stringify({
-        shop: shop,
-        order: order,
-        amount: amount,
-        currency: currency,
-        signature: signature,
-        handler: 'process'
-    });
+    // Отправка HTTP запроса
+    async sendRequest(data) {
+        const formData = new URLSearchParams(data).toString();
 
-    const options = {
-        hostname: '127.0.0.1', // Замените на ваш хост
-        port: 8000, // Используйте 443, если используете HTTPS
-        path: '/merchant/handler', // Путь к обработчику на сервере
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': formData.length
+        const options = {
+            hostname: this.config.host,
+            port: this.config.port,
+            path: this.config.path,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(formData)
+            }
+        };
+
+        return new Promise((resolve, reject) => {
+            const req = http.request(options, (res) => {
+                let responseData = '';
+
+                res.on('data', (chunk) => {
+                    responseData += chunk;
+                });
+
+                res.on('end', () => {
+                    resolve({
+                        statusCode: res.statusCode,
+                        headers: res.headers,
+                        redirectUrl: res.headers.location,
+                        body: responseData
+                    });
+                });
+            });
+
+            req.on('error', (error) => {
+                reject(error);
+            });
+
+            req.write(formData);
+            req.end();
+        });
+    }
+
+    // Парсинг параметров из URL редиректа
+    parseRedirectUrl(url) {
+        if (!url) return null;
+        const urlParams = new URL(url);
+        return Object.fromEntries(urlParams.searchParams);
+    }
+
+    // Следование по редиректу
+    async followRedirect(redirectUrl) {
+        const url = new URL(redirectUrl);
+        
+        const options = {
+            hostname: url.hostname,
+            port: url.port,
+            path: `${url.pathname}${url.search}`,
+            method: 'GET'
+        };
+
+        return new Promise((resolve, reject) => {
+            const req = http.request(options, (res) => {
+                let responseData = '';
+
+                res.on('data', (chunk) => {
+                    responseData += chunk;
+                });
+
+                res.on('end', () => {
+                    resolve({
+                        statusCode: res.statusCode,
+                        headers: res.headers,
+                        body: responseData
+                    });
+                });
+            });
+
+            req.on('error', (error) => {
+                reject(error);
+            });
+
+            req.end();
+        });
+    }
+
+    // Запуск тестов
+    async runTests() {
+        try {
+            console.log('Запуск тестов платежного API...\n');
+
+            // Тест 1: Корректный платежный запрос
+            console.log('Тест 1: Корректный платежный запрос');
+            const validResponse = await this.sendRequest(this.createPaymentRequest());
+            if (validResponse.redirectUrl) {
+                console.log('Начальный статус:', validResponse.statusCode);
+                console.log('URL редиректа:', validResponse.redirectUrl);
+                console.log('Параметры редиректа:', this.parseRedirectUrl(validResponse.redirectUrl));
+                
+                const redirectResponse = await this.followRedirect(validResponse.redirectUrl);
+                console.log('Финальный статус:', redirectResponse.statusCode);
+                console.log('Финальный ответ (первые 200 символов):', 
+                    redirectResponse.body.substring(0, 200) + '...');
+            }
+            console.log('-------------------\n');
+
+            // Тест 2: Неверная подпись
+            console.log('Тест 2: Неверная подпись');
+            const invalidData = this.createPaymentRequest();
+            invalidData.signature = 'invalid_signature';
+            const invalidResponse = await this.sendRequest(invalidData);
+            console.log('Статус:', invalidResponse.statusCode);
+            if (invalidResponse.redirectUrl) {
+                console.log('URL редиректа:', invalidResponse.redirectUrl);
+                const redirectResponse = await this.followRedirect(invalidResponse.redirectUrl);
+                console.log('Финальный статус:', redirectResponse.statusCode);
+            }
+            console.log('-------------------\n');
+
+            // Тест 3: Отсутствует обязательное поле
+            console.log('Тест 3: Отсутствует обязательное поле (amount)');
+            const incompleteData = this.createPaymentRequest();
+            delete incompleteData.amount;
+            const incompleteResponse = await this.sendRequest(incompleteData);
+            console.log('Статус:', incompleteResponse.statusCode);
+            if (incompleteResponse.redirectUrl) {
+                console.log('URL редиректа:', incompleteResponse.redirectUrl);
+            }
+            console.log('-------------------\n');
+
+            // Тест 4: Несуществующий магазин
+            console.log('Тест 4: Несуществующий магазин');
+            const invalidMerchantResponse = await this.sendRequest(
+                this.createPaymentRequest({ shop: '999999999' })
+            );
+            console.log('Статус:', invalidMerchantResponse.statusCode);
+            if (invalidMerchantResponse.redirectUrl) {
+                console.log('URL редиректа:', invalidMerchantResponse.redirectUrl);
+            }
+            console.log('-------------------\n');
+
+        } catch (error) {
+            console.error('Ошибка выполнения теста:', error.message);
         }
-    };
+    }
 
-    const req = http.request(options, (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        res.on('end', () => {
-            console.log(data);
-        });
-    });
-
-    req.on('error', (error) => {
-        console.error(error);
-    });
-
-    req.write(formData);
-    req.end();
+    // Вспомогательный метод для форматирования ответа
+    formatResponse(response) {
+        try {
+            return JSON.parse(response);
+        } catch {
+            return response;
+        }
+    }
 }
 
-test();
+// Запуск тестов
+const tester = new PaymentApiTest();
+tester.runTests();

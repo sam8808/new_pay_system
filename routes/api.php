@@ -1,10 +1,11 @@
 <?php
 
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\API\ApiController;
 use App\Http\Controllers\API\ApiHandlerController;
-use App\Http\Controllers\TestController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\TestPaymentController;
 
 Route::post('', ApiHandlerController::class)
     ->middleware('api');
@@ -30,3 +31,9 @@ Route::get('redirect/{action}', [ApiController::class, 'redirect'])
 
 
 Route::get('test', [TestController::class, 'test'])->name('merchant.test');
+
+
+Route::prefix('api/test')->group(function () {
+    Route::post('/payments', [TestPaymentController::class, 'create']);
+    Route::post('/payments/{payment}/process', [TestPaymentController::class, 'process']);
+});
