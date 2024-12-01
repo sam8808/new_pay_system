@@ -53,6 +53,21 @@ services:
       retries: 3
       timeout: 5s
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: finsystem_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "8080:80" 
+    networks:
+      - app_network
+    depends_on:
+      - mysql
+
 networks:
   app_network:
     driver: bridge
