@@ -80,83 +80,59 @@ const getModerationStatus = (merchant) => {
 </script>
 
 <template>
-    <DashboardLayout>
-        <div class="container mx-auto px-6 py-8">
+    <AccountLayout>
+        <div class="container mx-auto px-8 py-8">
             <!-- Заголовок и кнопка -->
-            <div
-                class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"
-            >
-                <div class="flex items-center gap-3">
-                    <h1 class="text-2xl font-medium text-gray-900">
-                        Список магазинов
-                    </h1>
-                    <span class="text-sm text-gray-500"
-                        >Всего: {{ merchants.total }}</span
-                    >
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-semibold text-gray-900">Список магазинов</h1>
+                    <span class="px-2.5 py-1 text-sm font-medium bg-violet-50 text-violet-700 rounded-lg">
+                        Всего: {{ merchants.total }}
+                    </span>
                 </div>
 
-                <Link
-                    :href="route('merchant.create')"
-                    class="inline-flex items-center px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-xl hover:bg-violet-700 transition-colors"
-                >
+                <Link :href="route('merchant.create')"
+                      class="inline-flex items-center px-5 py-2.5 bg-violet-600 text-white text-sm font-medium rounded-xl hover:bg-violet-700 shadow-lg shadow-violet-600/20 transition-all duration-300">
                     <Plus class="w-4 h-4 mr-2" />
                     Подключить магазин
                 </Link>
             </div>
 
             <!-- Таблица -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden backdrop-blur-xl">
                 <div class="overflow-x-auto">
                     <table v-if="merchants.data.length > 0" class="w-full">
                         <thead>
-                            <tr class="border-b border-gray-100">
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-                                >
+                            <tr>
+                                <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
                                     ID
                                 </th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-                                >
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
                                     Название
                                 </th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-                                >
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
                                     Баланс
                                 </th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-                                >
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
                                     Комиссия
                                 </th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-                                >
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
                                     Статус
                                 </th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-                                >
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
                                     Модерация
                                 </th>
                             </tr>
                         </thead>
 
                         <tbody class="divide-y divide-gray-100">
-                            <tr
-                                v-for="merchant in merchants.data"
+                            <tr v-for="merchant in merchants.data"
                                 :key="merchant.id"
-                                class="hover:bg-gray-50/50 transition-colors"
-                            >
+                                class="hover:bg-gray-50/50 transition-all duration-300">
                                 <!-- ID -->
-                                <td class="px-6 py-4">
-                                    <Link
-                                        :href="
-                                            route('merchant.show', merchant.id)
-                                        "
-                                        class="text-sm font-medium text-violet-600 hover:text-violet-700"
-                                    >
+                                <td class="px-8 py-4">
+                                    <Link :href="route('merchant.show', merchant.id)"
+                                          class="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">
                                         {{ merchant.m_id }}
                                     </Link>
                                 </td>
@@ -164,70 +140,47 @@ const getModerationStatus = (merchant) => {
                                 <!-- Название -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <Store class="w-5 h-5 text-gray-400" />
-                                        <span
-                                            class="text-sm font-medium text-gray-900"
-                                            >{{ merchant.title }}</span
-                                        >
+                                        <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                                            <Store class="w-4 h-4 text-gray-400" />
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">{{ merchant.title }}</span>
                                     </div>
                                 </td>
 
                                 <!-- Баланс -->
                                 <td class="px-6 py-4">
-                                    <span
-                                        class="text-sm font-medium text-gray-900"
-                                    >
-                                        {{
-                                            formatCurrency(
-                                                merchant.balance,
-                                                "RUB"
-                                            )
-                                        }}
+                                    <span class="text-sm font-medium text-gray-900">
+                                        {{ formatCurrency(merchant.balance, "RUB") }}
                                     </span>
                                 </td>
 
                                 <!-- Комиссия -->
                                 <td class="px-6 py-4">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                                    >
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-violet-50 text-violet-700">
                                         {{ merchant.percent }}%
                                     </span>
                                 </td>
 
                                 <!-- Статус -->
                                 <td class="px-6 py-4">
-                                    <div
-                                        :class="[
-                                            'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium gap-1.5',
-                                            getMerchantStatus(merchant).class,
-                                        ]"
-                                    >
-                                        <component
-                                            :is="
-                                                getMerchantStatus(merchant).icon
-                                            "
-                                            class="w-4 h-4"
-                                        />
+                                    <div :class="[
+                                        'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium gap-1.5',
+                                        getMerchantStatus(merchant).class,
+                                    ]">
+                                        <component :is="getMerchantStatus(merchant).icon"
+                                                   class="w-4 h-4" />
                                         {{ getMerchantStatus(merchant).text }}
                                     </div>
                                 </td>
 
                                 <!-- Модерация -->
                                 <td class="px-6 py-4">
-                                    <div
-                                        :class="[
-                                            'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium gap-1.5',
-                                            getModerationStatus(merchant).class,
-                                        ]"
-                                    >
-                                        <component
-                                            :is="
-                                                getModerationStatus(merchant)
-                                                    .icon
-                                            "
-                                            class="w-4 h-4"
-                                        />
+                                    <div :class="[
+                                        'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium gap-1.5',
+                                        getModerationStatus(merchant).class,
+                                    ]">
+                                        <component :is="getModerationStatus(merchant).icon"
+                                                   class="w-4 h-4" />
                                         {{ getModerationStatus(merchant).text }}
                                     </div>
                                 </td>
@@ -236,21 +189,15 @@ const getModerationStatus = (merchant) => {
                     </table>
 
                     <!-- Пустое состояние -->
-                    <div
-                        v-else
-                        class="flex flex-col items-center justify-center py-12 px-4"
-                    >
-                        <Store class="w-12 h-12 text-gray-400 mb-4" />
-                        <h3 class="text-lg font-medium text-gray-900 mb-1">
-                            Нет магазинов
-                        </h3>
-                        <p class="text-sm text-gray-500 mb-4">
-                            У вас нет подключенных магазинов на данный момент
-                        </p>
-                        <Link
-                            :href="route('merchant.create')"
-                            class="inline-flex items-center px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-xl hover:bg-violet-700 transition-colors"
-                        >
+                    <div v-else
+                         class="flex flex-col items-center justify-center py-16 px-4">
+                        <div class="w-16 h-16 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
+                            <Store class="w-8 h-8 text-violet-600" />
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Нет магазинов</h3>
+                        <p class="text-sm text-gray-500 mb-6">У вас нет подключенных магазинов на данный момент</p>
+                        <Link :href="route('merchant.create')"
+                              class="inline-flex items-center px-5 py-2.5 bg-violet-600 text-white text-sm font-medium rounded-xl hover:bg-violet-700 shadow-lg shadow-violet-600/20 transition-all duration-300">
                             <Plus class="w-4 h-4 mr-2" />
                             Подключить первый магазин
                         </Link>
@@ -258,15 +205,13 @@ const getModerationStatus = (merchant) => {
                 </div>
 
                 <!-- Пагинация -->
-                <div
-                    v-if="merchants.data.length > 0"
-                    class="border-t border-gray-100 px-4 py-3"
-                >
+                <div v-if="merchants.data.length > 0"
+                     class="border-t border-gray-100 px-6 py-4 bg-gray-50/80">
                     <pagination :links="merchants.links" />
                 </div>
             </div>
         </div>
-    </DashboardLayout>
+    </AccountLayout>
 </template>
 
 <style scoped>
@@ -282,10 +227,25 @@ const getModerationStatus = (merchant) => {
 
 ::-webkit-scrollbar-thumb {
     background: #e5e7eb;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: #d1d5db;
+}
+
+/* Улучшенные эффекты */
+.shadow-lg {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover\:shadow-xl:hover {
+    transform: translateY(-2px);
+}
+
+/* Эффект размытия */
+.backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
 }
 </style>

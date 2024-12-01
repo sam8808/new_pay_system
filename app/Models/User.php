@@ -2,81 +2,68 @@
 
 namespace App\Models;
 
-use App\Models\Merchant;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'identify',
+        'account',
         'email',
         'password',
-        'is_active',
+        'telegram',
+        'phone',
         'referrer_id',
-        'last_login_at',
+        'is_active',
+        'is_verified',
+        'settings',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'is_active' => 'boolean',
         'last_login_at' => 'datetime',
+        'settings' => 'array',
+        'is_active' => 'boolean',
+        'is_verified' => 'boolean',
     ];
 
-
-
-
-    public function referrer(): BelongsTo
+    public function referrer()
     {
-        return $this->belongsTo(User::class, 'referrer_id', 'id');
+        return $this->belongsTo(User::class, 'referrer_id');
     }
 
-    public function referrals(): HasMany
+    public function referrals()
     {
-        return $this->hasMany(User::class, 'referrer_id', 'id');
+        return $this->hasMany(User::class, 'referrer_id');
     }
 
-
-    public function merchants(): HasMany
+    public function wallets()
     {
-        return $this->hasMany(Merchant::class, 'user_id');
+        return $this->hasMany(Wallet::class);
     }
 
-
-    public function withdrawals(): HasMany
+    public function merchants()
     {
-        return $this->hasMany(Withdrawal::class, 'user_id');
+        return $this->hasMany(Merchant::class);
     }
 
-    public function transactions(): HasMany
+    public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'user_id');
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
     }
 }

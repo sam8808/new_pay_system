@@ -3,23 +3,17 @@
 namespace App\Services;
 
 use App\Models\Merchant;
-use App\Models\Payment;
-use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 
 class ApiService
 {
-
     public function __construct(
-        public readonly Request  $request,
-        public readonly Merchant $merchant
+        public readonly Request $request,
+        public readonly Merchant $merchant,
+        private readonly SignatureService $signatureService
     ) {}
 
-
-    /**
-     * @return void
-     */
     public function validate(): void
     {
         $this->request->validate([
@@ -29,78 +23,27 @@ class ApiService
             'user_identify' => ['required'],
             'currency' => ['required'],
             'signature' => ['required'],
-        ]);;
+        ]);
     }
 
-
-    /**
-     * @return bool
-     */
     public function verifyHash(): bool
     {
-        return $this->getHash() === $this->request->post('signature') || $this->request->get('signature');
+        $data = [
+            'shop' => $this->merchant->m_id,
+            'order' => $this->request->post('order'),
+            'amount' => $this->request->post('amount'),
+            'currency' => $this->request->post('currency'),
+        ];
+
+        return $this->signatureService->verifySignature(
+            $data,
+            $this->request->post('signature'),
+            $this->merchant->m_key
+        );
     }
 
-    /**
-     * @return bool
-     */
     public function merchantExists(): bool
     {
         return (bool)$this->merchant;
-    }
-
-
-    /**
-     * @return string
-     */
-    protected function getHash(): string
-    {
-        $data = [
-            $this->merchant->m_id,
-            $this->request->post('order'),
-            $this->request->post('amount'),
-            $this->request->post('currency'),
-            $this->merchant->m_key,
-        ];
-
-        $hashString = implode(':', $data);
-        $hashedValue = hash('sha256', $hashString);
-
-        return strtoupper($hashedValue);
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @return array
-     */
-    public static function mappingResponseData(Transaction $transaction): array
-    {
-        $payment = $transaction->payment()->first();
-
-        return [
-            'status' => 'success',
-            'operation_id' => $transaction->id,
-            'operation_pay_system' => $payment->payment_system,
-            'operation_date' => $transaction->created_at->format('Y-m-d H:i:s'),
-            'operation_pay_date' => $transaction->updated_at->format('Y-m-d H:i:s'),
-            'shop' => $payment->m_id,
-            'order' => $payment->order,
-            'amount' => $transaction->amount,
-            'amount_azn' => $payment->amount_default_currency,
-            'currency' => $transaction->currency,
-            'shop_key' => $payment->merchant->m_key,
-        ];
-    }
-
-    /**
-     * @param $data
-     * @return string
-     */
-    public static function generateSignature($data): string
-    {
-        $hashString = implode(':', $data);
-        $hashedValue = hash('sha256', $hashString);
-
-        return strtoupper($hashedValue);
     }
 }

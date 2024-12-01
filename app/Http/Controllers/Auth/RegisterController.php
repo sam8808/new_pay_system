@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Jobs\CreateUserWallets;
 use App\Jobs\SendEmailNotification;
-use App\Jobs\SendTelegramNotification;
 use App\Services\Auth\LoginService;
+use App\Http\Controllers\Controller;
+use App\Jobs\SendTelegramNotification;
 use App\Services\Auth\RegisterService;
 use Illuminate\Support\Facades\Redirect;
 
@@ -34,10 +35,12 @@ class RegisterController extends Controller
             return Redirect::back()->withErrors($service->getErrors());
         }
 
+
         $message = "🔔 Новый пользователь!\n" .
             "Email: {$service->user()->email}\n" .
-            "ID: {$service->user()->identify}";
+            "ID: {$service->user()->account}";
 
+        CreateUserWallets::dispatch($service->user());
         SendEmailNotification::dispatch($service->user());
         SendTelegramNotification::dispatch($message);
 

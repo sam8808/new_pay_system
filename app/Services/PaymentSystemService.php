@@ -11,14 +11,12 @@ use App\Services\FileUploadService;
 
 class PaymentSystemService
 {
-    /**
-     * @param Request $request
-     */
-    public function __construct(public readonly Request $request) {}
 
-    /**
-     * @return $this
-     */
+    public function __construct(
+        public readonly Request $request
+    ) {}
+
+
     public function validate(): static
     {
         $this->request->validate([
@@ -32,9 +30,7 @@ class PaymentSystemService
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function validateInfo(): static
     {
         $this->request->validate([
@@ -46,9 +42,6 @@ class PaymentSystemService
     }
 
 
-    /**
-     * @return void
-     */
     public function create(): void
     {
         $fileUpload = $this->getFileUpload();
@@ -93,11 +86,7 @@ class PaymentSystemService
         }
     }
 
-    /**
-     * @param $paymentSystem
-     * @param $data
-     * @return bool
-     */
+
     private function isDataDifferent($paymentSystem, $data): bool
     {
         return ($paymentSystem->title != $data['title'] ||
@@ -107,9 +96,7 @@ class PaymentSystemService
     }
 
 
-    /**
-     * @return FileUploadService
-     */
+
     public function getFileUpload(): FileUploadService
     {
         $fileUpload = new FileUploadService($this->request->file('logo'), 'payment_systems');

@@ -19,11 +19,11 @@ class MerchantService
 
     private const VALIDATION_RULES = [
         'title' => ['required', 'string', 'max:255'],
-        'base_url' => ['required', 'string', 'unique:merchants,base_url', 'url:https'],
-        'success_url' => ['required', 'string', 'url:https'],
-        'fail_url' => ['required', 'string', 'url:https'],
-        'handler_url' => ['required', 'string', 'url:https'],
+        'domain' => ['nullable', 'string', 'url'],
+        'webhook_url' => ['required', 'string', 'unique:merchants,webhook_url', 'url:https'],
+        'allowed_ips' => ['nullable', 'json'],
     ];
+    
 
 
     private array $validatedData = [];
@@ -51,14 +51,16 @@ class MerchantService
         try {
             return Merchant::create([
                 'user_id' => $this->request->user()->id,
-                'm_id' => $this->generateId(),
-                'm_key' => $this->generateKey(),
                 'title' => $this->validatedData['title'],
-                'base_url' => $this->validatedData['base_url'],
-                'success_url' => $this->validatedData['success_url'],
-                'fail_url' => $this->validatedData['fail_url'],
-                'handler_url' => $this->validatedData['handler_url'],
+                'domain' => $this->validatedData['domain'] ?? null,
+                'merchant_id' => $this->generateId(),
+                'api_key' => $this->generateKey(),
+                'secret_key' => $this->generateKey(),
+                'webhook_url' => $this->validatedData['webhook_url'],
+                'allowed_ips' => $this->validatedData['allowed_ips'] ?? null,
+                'is_active' => true,
             ]);
+            
         } catch (Exception $e) {
             Log::error('Failed to create merchant', [
                 'error' => $e->getMessage(),
@@ -85,7 +87,7 @@ class MerchantService
             $this->request->post('order'),
             $this->request->post('amount'),
             $this->request->post('currency'),
-            $merchant->m_key,
+            $merchant->secret_key,
         ];
 
         return $this->generateHash($data);
@@ -105,18 +107,13 @@ class MerchantService
                     $this->validateUrlStartsWith($attribute, $value, $fail);
                 },
             ],
-            'handler_url' => [
-                function ($attribute, $value, $fail) {
-                    $this->validateUrlStartsWith($attribute, $value, $fail);
-                },
-            ],
         ];
     }
 
 
     private function validateUrlStartsWith(string $attribute, string $value, callable $fail): void
     {
-        $baseUrl = $this->request->input('base_url');
+        $baseUrl = $this->request->input('webhook_url');
         if (!Str::startsWith($value, $baseUrl)) {
             $fail(__(':Attribute must start with base URL', [
                 'attribute' => Str::title(str_replace('_', ' ', $attribute))

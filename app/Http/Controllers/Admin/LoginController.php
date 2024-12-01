@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
-use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 
 class LoginController extends Controller
 {
-    /**
-     * @return View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-     */
-    public function index(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+
+    public function index()
     {
-        return view('admin.auth.login');
+        return Inertia::render('Admin/Login');
     }
 
     /**

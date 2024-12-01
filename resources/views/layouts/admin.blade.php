@@ -60,7 +60,13 @@
                             <span class="mx-3">{{ __('Платежные системы')  }}</span>
                         </a>
 
-                        <a href="{{ route('admin.ps.info') }}"
+                        <a href="{{ route('admin.currency') }}"
+                            class="text-yellow-400 m-5 font-semibold flex items-center mt-4 py-2 px-6 transition duration-300 rounded-md hover:bg-yellow-400  hover:text-black hover:shadow-md"
+                            x-bind:class="{'active': currentRoute === 'admin.ps' || currentRoute === 'admin.ps.create'}">
+                            <span class="mx-3">{{ __('Валюты')  }}</span>
+                        </a>
+
+                        <!-- <a href="{{ route('admin.ps.info') }}"
                             class="text-yellow-400 m-5 font-semibold flex items-center mt-4 py-2 px-6 transition duration-300 rounded-md hover:bg-yellow-400  hover:text-black hover:shadow-md"
                             x-bind:class="{'active':
                          currentRoute === 'admin.ps.info' ||
@@ -68,7 +74,7 @@
                          currentRoute === 'admin.ps.info.show'
                          }">
                             <span class="mx-3">{{ __('Реквизиты')  }}</span>
-                        </a>
+                        </a> -->
 
                         <a href="{{ route('admin.withdrawal') }}"
                             class="text-yellow-400 m-5 font-semibold flex items-center mt-4 py-2 px-6 transition duration-300 rounded-md hover:bg-yellow-400  hover:text-black hover:shadow-md"

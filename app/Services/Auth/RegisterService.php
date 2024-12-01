@@ -25,21 +25,31 @@ class RegisterService
             'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/',
         ],
         'password_confirmation' => ['required'],
+        'telegram' => ['nullable', 'string', 'max:50'],
+        'phone' => ['nullable', 'string', 'max:20'],
     ];
 
+
     private string $email;
+    private string $account;
     private string $password;
     private string $password_confirmation;
+    private ?string $telegram;
+    private ?string $phone;
     private bool $agreement;
     private array $errors = [];
     private bool $fail = false;
     private ?User $user = null;
 
+
     public function __construct(array $data)
     {
-        $this->email = trim($data['email'] ?? '');
+        $this->email = trim(strtolower($data['email'] ?? ''));
+        $this->account = $this->generateAccount('F');
         $this->password = $data['password'] ?? '';
         $this->password_confirmation = $data['password_confirmation'] ?? '';
+        $this->telegram = !empty($data['telegram']) ? trim($data['telegram']) : null;
+        $this->phone = !empty($data['phone']) ? trim($data['phone']) : null;
         $this->agreement = (bool)($data['agreement'] ?? false);
     }
 
@@ -82,10 +92,14 @@ class RegisterService
         try {
             DB::transaction(function () {
                 $this->user = User::create([
-                    'identify' => $this->generateIdentify(),
+                    'account' => $this->account,
                     'email' => $this->email,
                     'password' => $this->hashPassword(),
+                    'telegram' => $this->telegram,
+                    'phone' => $this->phone,
                     'referrer_id' => $this->getReferrer(),
+                    'is_active' => true,
+                    'is_verified' => false
                 ]);
             });
         } catch (Exception $e) {
@@ -134,6 +148,8 @@ class RegisterService
         return [
             'email.required' => __('Email is required'),
             'email.email' => __('Invalid email format'),
+            'account.required' => __('Account name is required'),
+            'account.unique' => __('This account name is already taken'),
             'password.required' => __('Password is required'),
             'password.confirmed' => __('Passwords do not match'),
             'password.min' => __('Password must be at least 8 characters'),
@@ -141,18 +157,19 @@ class RegisterService
         ];
     }
 
-    private function generateIdentify(string $prefix = ''): string
+
+    private function generateAccount(string $prefix = ''): string
     {
         try {
             $result = bin2hex(random_bytes(self::IDENTIFY_LENGTH));
             return $prefix . substr($result, 0, self::IDENTIFY_LENGTH);
         } catch (Exception $e) {
             Log::warning('Fallback to less secure identify generation');
-            return $this->generateIdentifyFallback($prefix);
+            return $this->generateAccountFallback($prefix);
         }
     }
 
-    private function generateIdentifyFallback(string $prefix = ''): string
+    private function generateAccountFallback(string $prefix = ''): string
     {
         $characters = self::CHARACTERS;
         $charactersLength = strlen($characters);

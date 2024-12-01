@@ -13,18 +13,24 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('identify')->unique();
+            $table->string('account', 50)->unique();
             $table->string('email')->unique();
+            $table->string('password');
             $table->unsignedBigInteger('referrer_id')->nullable();
             $table->string('telegram')->nullable();
             $table->timestamp('last_login_at')->nullable();
-            $table->string('password');
+            $table->string('phone')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_verified')->default(false);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->json('settings')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index('email');
-            $table->index('identify');
+            $table->index('account');
+            $table->index(['is_active', 'is_verified']);
             $table->index('referrer_id');
 
             $table->foreign('referrer_id')

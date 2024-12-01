@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Merchant;
-use App\Models\Payment;
-use App\Models\Transaction;
-use App\Models\User;
-use App\Models\Withdrawal;
-use App\Services\StatisticService;
 use Carbon\Carbon;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Payment;
+use App\Models\Merchant;
+use App\Models\Withdrawal;
+use App\Models\Transaction;
+use App\Services\StatisticService;
 use Illuminate\Support\Collection;
+use Illuminate\Contracts\View\View;
+use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Application;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MainController extends Controller
 {
@@ -38,7 +38,9 @@ class MainController extends Controller
             'approvedWithdrawalsSumThisMonth' => $statisticService->getApprovedWithdrawalsSumThisMonth(),
         ];
 
-        return view('admin.index', ['statistics' => $statistics]);
+        return Inertia::render('Admin/Dashboard', [
+            'statistics' => $statistics
+        ]);
     }
 
     /**
@@ -81,5 +83,4 @@ class MainController extends Controller
 
         return view('admin.transaction', ['transaction' => $transaction]);
     }
-
 }

@@ -19,7 +19,7 @@ class LoginService
 
     protected const RULES = [
         'email' => ['required', 'email', 'max:255'],
-        'password' => ['required', 'string', 'min:6'],
+        'password' => ['required', 'string', 'min:8'],
     ];
 
     protected const MESSAGES = [
@@ -137,7 +137,7 @@ class LoginService
     private function userExists(): bool
     {
         $this->user = User::where('email', $this->email)
-            ->select(['id', 'email', 'password', 'is_active'])
+            ->select(['id', 'email', 'password', 'is_active', 'is_verified'])
             ->first();
 
         if (!$this->user) {
@@ -147,6 +147,13 @@ class LoginService
         if (!$this->user->is_active) {
             $this->errors = [__('Account is deactivated')];
             return false;
+        }
+
+        if (!$this->user->is_verified) {
+            Log::warning('Unverified user login attempt', [
+                'user_id' => $this->user->id,
+                'email' => $this->email
+            ]);
         }
 
         return Hash::check($this->password, $this->user->password);
@@ -176,7 +183,9 @@ class LoginService
     private function updateLastLogin(): void
     {
         if ($this->user) {
-            $this->user->update(['last_login_at' => now()]);
+            $this->user->update([
+                'last_login_at' => now(),
+            ]);
         }
     }
 
@@ -215,4 +224,6 @@ class LoginService
     {
         return self::CACHE_KEY_PREFIX . request()->ip();
     }
+
+    
 }

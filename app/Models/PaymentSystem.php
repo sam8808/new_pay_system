@@ -2,50 +2,56 @@
 
 namespace App\Models;
 
-use App\Models\PaymentSystemDetail;
+use App\Models\Payment;
+use App\Models\Currency;
+use App\Models\Withdrawal;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PaymentSystem extends Model
 {
     use HasFactory;
 
-
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'title',
-        'desc',
-        'url',
+        'code',
+        'description',
+        'provider',
+        'provider_settings',
         'logo',
-        'currency',
-        'has_withdrawal',
-        'activated',
+        'currency_id',
+        'type',
+        'min_amount',
+        'max_amount',
+        'processing_fee',
+        'processing_time',
+        'is_active',
+        'sort_order',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
-        'activated' => 'boolean',
-        'has_withdrawal' => 'boolean',
+        'provider_settings' => 'array',
+        'min_amount' => 'decimal:8',
+        'max_amount' => 'decimal:8',
+        'processing_fee' => 'decimal:4',
+        'processing_time' => 'integer',
+        'is_active' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
-    /**
-     * @return HasMany
-     */
-    public function details(): HasMany
+    public function currency()
     {
-        return $this->hasMany(PaymentSystemDetail::class, 'ps_id');
+        return $this->belongsTo(Currency::class);
     }
 
-    /**
-     * @return HasMany
-     */
-    public function withdrawals(): HasMany
+    public function payments()
     {
-        return $this->hasMany(Withdrawal::class, 'payment_system');
+        return $this->hasMany(Payment::class);
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
     }
 }
+

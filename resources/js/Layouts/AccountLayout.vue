@@ -124,66 +124,69 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="flex h-screen bg-[#F7F7F9]">
-        <!-- Overlay -->
+    <div class="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <!-- Overlay с размытием -->
         <div
             v-show="sidebarOpen"
             @click="closeSidebar"
-            class="fixed inset-0 z-20 bg-gray-900/20 backdrop-blur-sm lg:hidden"
+            class="fixed inset-0 z-20 bg-gray-900/30 backdrop-blur-sm lg:hidden"
         ></div>
 
-        <!-- Сайдбар -->
+        <!-- Обновленный сайдбар -->
         <aside
             :class="[
-                'fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out bg-white',
+                'fixed inset-y-0 left-0 z-30 w-72 transform transition-all duration-300 ease-in-out bg-white/80 backdrop-blur-xl border-r border-gray-100',
                 sidebarOpen ? 'translate-x-0' : '-translate-x-full',
                 'lg:translate-x-0 lg:static',
             ]"
         >
-            <!-- Логотип -->
-            <div class="flex items-center gap-3 px-5 h-16">
+            <!-- Обновленный логотип -->
+            <div class="flex items-center gap-3 px-6 h-20">
                 <div
-                    class="w-9 h-9 bg-violet-600 rounded-lg flex items-center justify-center"
+                    class="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20"
                 >
-                    <span class="text-white font-bold">PS</span>
+                    <span class="text-white font-bold text-lg">PS</span>
                 </div>
                 <div class="flex flex-col">
-                    <div class="font-semibold text-gray-900">Payment System</div>
-                    <!-- <div class="text-xs text-gray-500">Digital Market V1</div> -->
+                    <div
+                        class="font-semibold text-gray-900 text-lg tracking-tight"
+                    >
+                        Payment System
+                    </div>
                 </div>
             </div>
 
-            <!-- Навигация -->
-            <nav class="mt-5 px-4">
+            <!-- Обновленная навигация -->
+            <nav class="mt-6 px-4">
                 <Link
                     v-for="item in navigationItems"
                     :key="item.name"
                     :href="route(item.route)"
                     :class="[
-                        'flex items-center h-10 gap-3 px-3 rounded-lg text-sm mb-1 transition-colors',
+                        'flex items-center h-11 gap-3 px-4 rounded-xl text-sm mb-1.5 transition-all duration-200',
                         isCurrentRoute(item.route)
-                            ? 'bg-violet-50 text-violet-700'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900',
+                            ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/20'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
                     ]"
                 >
                     <component
                         :is="item.icon"
                         :class="[
-                            'w-5 h-5',
+                            'w-5 h-5 transition-colors',
                             isCurrentRoute(item.route)
-                                ? 'text-violet-600'
-                                : 'text-gray-400',
+                                ? 'text-white'
+                                : 'text-gray-400 group-hover:text-gray-600',
                         ]"
                     />
                     <span class="font-medium">{{ item.name }}</span>
 
                     <div
                         v-if="item.badge"
-                        class="ml-auto px-2 py-0.5 text-xs font-medium rounded-full"
+                        class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full"
                         :class="[
                             isCurrentRoute(item.route)
-                                ? 'bg-violet-100 text-violet-700'
-                                : 'bg-gray-100 text-gray-600',
+                                ? 'bg-white/20 text-white'
+                                : 'bg-violet-100 text-violet-700',
                         ]"
                     >
                         {{ item.badge }}
@@ -191,18 +194,20 @@ onUnmounted(() => {
                 </Link>
             </nav>
 
-            <!-- Разделитель -->
-            <div class="mx-4 my-4 border-t border-gray-100"></div>
+            <!-- Обновленный разделитель -->
+            <div class="mx-4 my-4 border-t border-gray-100/50"></div>
 
-            <!-- Дополнительные пункты -->
+            <!-- Обновленные дополнительные пункты -->
             <div class="px-4">
                 <Link
                     :href="route('logout')"
                     method="post"
                     as="button"
-                    class="flex items-center h-10 gap-3 px-3 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 w-full"
+                    class="flex items-center h-11 gap-3 px-4 rounded-xl text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full group"
                 >
-                    <LogOut class="w-5 h-5 text-gray-400" />
+                    <LogOut
+                        class="w-5 h-5 text-gray-400 group-hover:text-red-500"
+                    />
                     <span class="font-medium">Выход</span>
                 </Link>
             </div>
@@ -210,14 +215,16 @@ onUnmounted(() => {
 
         <!-- Основной контент -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Шапка -->
-            <header class="h-16 bg-white shadow-sm">
-                <div class="h-full px-6 flex items-center justify-between">
+            <!-- Обновленная шапка -->
+            <header
+                class="h-20 bg-white/80 backdrop-blur-xl border-b border-gray-100"
+            >
+                <div class="h-full px-8 flex items-center justify-between">
                     <!-- Левая часть -->
                     <div class="flex items-center gap-8">
                         <button
                             @click="toggleSidebar"
-                            class="lg:hidden text-gray-400 hover:text-gray-600"
+                            class="lg:hidden text-gray-400 hover:text-gray-600 transition-colors"
                         >
                             <Menu class="w-6 h-6" />
                         </button>
@@ -225,20 +232,20 @@ onUnmounted(() => {
 
                     <!-- Правая часть -->
                     <div class="flex items-center gap-6">
-                        <!-- Разделитель -->
-                        <div class="h-6 w-px bg-gray-200"></div>
+                        <!-- Обновленный разделитель -->
+                        <div class="h-8 w-px bg-gray-200/70"></div>
 
-                        <!-- Профиль -->
+                        <!-- Обновленный профиль -->
                         <div class="relative profile-dropdown">
                             <button
                                 @click="toggleProfileDropdown"
-                                class="flex items-center gap-3"
+                                class="flex items-center gap-3 group"
                             >
                                 <div
-                                    class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center"
+                                    class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-100 to-violet-200 flex items-center justify-center transition-transform group-hover:scale-105"
                                 >
                                     <span
-                                        class="text-sm font-medium text-violet-700"
+                                        class="text-sm font-semibold text-violet-700"
                                     >
                                         {{
                                             $page.props.user.email
@@ -249,20 +256,21 @@ onUnmounted(() => {
                                 </div>
                             </button>
 
+                            <!-- Обновленное выпадающее меню профиля -->
                             <div
                                 v-if="profileDropdownOpen"
-                                class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+                                class="absolute right-0 mt-3 w-80 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100/50 overflow-hidden"
                             >
                                 <!-- Шапка профиля -->
                                 <div
-                                    class="p-4 bg-gray-50/50 border-b border-gray-100"
+                                    class="p-5 bg-gradient-to-br from-violet-500/5 to-violet-600/5 border-b border-gray-100/50"
                                 >
-                                    <div class="flex items-start gap-3">
+                                    <div class="flex items-start gap-4">
                                         <div
-                                            class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center"
+                                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-violet-200 flex items-center justify-center"
                                         >
                                             <span
-                                                class="text-sm font-medium text-violet-700"
+                                                class="text-base font-semibold text-violet-700"
                                             >
                                                 {{
                                                     $page.props.user.email
@@ -273,7 +281,7 @@ onUnmounted(() => {
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p
-                                                class="text-sm font-medium text-gray-900 truncate"
+                                                class="text-base font-medium text-gray-900 truncate"
                                             >
                                                 {{ $page.props.user.email }}
                                             </p>
@@ -281,9 +289,11 @@ onUnmounted(() => {
                                     </div>
                                 </div>
 
-                                <!-- Информация и статистика -->
-                                <div class="px-4 py-3 border-b border-gray-100">
-                                    <div class="grid grid-cols-2 gap-4">
+                                <!-- Обновленная информация и статистика -->
+                                <div
+                                    class="px-5 py-4 border-b border-gray-100/50"
+                                >
+                                    <div class="grid grid-cols-2 gap-6">
                                         <div>
                                             <p
                                                 class="text-xs font-medium text-gray-500"
@@ -291,7 +301,7 @@ onUnmounted(() => {
                                                 ID пользователя
                                             </p>
                                             <p
-                                                class="text-sm font-medium text-violet-600 mt-0.5"
+                                                class="text-sm font-semibold text-violet-600 mt-1"
                                             >
                                                 #{{ $page.props.user.identify }}
                                             </p>
@@ -303,7 +313,7 @@ onUnmounted(() => {
                                                 Последний вход
                                             </p>
                                             <p
-                                                class="text-sm text-gray-900 mt-0.5"
+                                                class="text-sm font-medium text-gray-900 mt-1"
                                             >
                                                 Сегодня, 14:23
                                             </p>
@@ -311,44 +321,47 @@ onUnmounted(() => {
                                     </div>
                                 </div>
 
-                                <!-- Действия -->
-                                <div class="p-2">
-                                    <!-- Настройки профиля -->
+                                <!-- Обновленные действия -->
+                                <div class="p-3">
                                     <Link
-                                        :href="route('dashboard')"
-                                        class="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group"
+                                        v-for="(action, index) in [
+                                            {
+                                                icon: Settings,
+                                                text: 'Настройки профиля',
+                                                route: 'dashboard',
+                                            },
+                                            {
+                                                icon: KeyRound,
+                                                text: 'Безопасность',
+                                                route: 'dashboard',
+                                            },
+                                        ]"
+                                        :key="index"
+                                        :href="route(action.route)"
+                                        class="w-full flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors group"
                                     >
-                                        <Settings
-                                            class="w-4 h-4 mr-2 text-gray-400 group-hover:text-gray-600"
+                                        <component
+                                            :is="action.icon"
+                                            class="w-4 h-4 mr-3 text-gray-400 group-hover:text-violet-600"
                                         />
-                                        <span>Настройки профиля</span>
+                                        <span
+                                            class="group-hover:text-gray-900"
+                                            >{{ action.text }}</span
+                                        >
                                     </Link>
 
-                                    <!-- Безопасность -->
-                                    <Link
-                                        :href="route('dashboard')"
-                                        class="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors group"
-                                    >
-                                        <KeyRound
-                                            class="w-4 h-4 mr-2 text-gray-400 group-hover:text-gray-600"
-                                        />
-                                        <span>Безопасность</span>
-                                    </Link>
-
-                                    <!-- Разделитель -->
                                     <div
-                                        class="h-px bg-gray-100 my-2 mx-2"
+                                        class="h-px bg-gray-100 my-2 mx-3"
                                     ></div>
 
-                                    <!-- Выход -->
                                     <Link
                                         :href="route('logout')"
                                         method="post"
                                         as="button"
-                                        class="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+                                        class="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors group"
                                     >
                                         <LogOut
-                                            class="w-4 h-4 mr-2 text-red-500"
+                                            class="w-4 h-4 mr-3 text-red-500"
                                         />
                                         <span>Выйти из системы</span>
                                     </Link>
@@ -361,7 +374,7 @@ onUnmounted(() => {
 
             <!-- Основной контент -->
             <main
-                class="flex-1 overflow-x-hidden overflow-y-auto bg-[#F7F7F9] p-6"
+                class="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100 p-8"
             >
                 <div class="max-w-7xl mx-auto">
                     <slot />
@@ -370,6 +383,48 @@ onUnmounted(() => {
         </div>
     </div>
 </template>
+
+<style>
+:root {
+    --violet-50: #f5f3ff;
+    --violet-100: #ede9fe;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --violet-700: #6d28d9;
+}
+
+/* Обновленные стили для скроллбара */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
+
+/* Дополнительные стили для анимаций */
+.transition-transform {
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Улучшенные эффекты размытия */
+.backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+</style>
 
 <style>
 :root {

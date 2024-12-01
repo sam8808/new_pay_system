@@ -3,82 +3,47 @@
 namespace App\Models;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Merchant extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'user_id',
         'title',
-        'base_url',
-        'success_url',
-        'fail_url',
-        'handler_url',
-        'balance',
-        'percent',
-        'm_id',
-        'm_key',
-        'approved',
-        'rejected',
-        'activated',
-        'banned',
+        'domain',
+        'description',
+        'merchant_id',
+        'api_key',
+        'secret_key',
+        'webhook_url',
+        'type',
+        'processing_fee',
+        'allowed_ips',
+        'is_active',
+        'is_succes_moderation',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
-        'm_key' => 'encrypted',
-        'approved' => 'boolean',
-        'rejected' => 'boolean',
-        'activated' => 'boolean',
-        'banned' => 'boolean',
+        'allowed_ips' => 'array',
+        'processing_fee' => 'decimal:4',
+        'is_active' => 'boolean',
+        'is_succes_moderation' => 'boolean',
     ];
 
 
-    /**
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
+
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return HasMany
-     */
-    public function payments(): HasMany
+    public function payments()
     {
-        return $this->hasMany(Payment::class, 'm_id', 'm_id');
+        return $this->hasMany(Payment::class);
     }
-
-    /**
-     * @return HasMany
-     */
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'm_id');
-    }
-
-    /**
-     * @param $query
-     * @return mixed
-     */
-    public function scopeApprovedAndActivated($query): mixed
-    {
-        return $query->where('approved', true)
-            ->where('activated', true)
-            ->where('banned', false);
-    }
-
-
 }

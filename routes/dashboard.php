@@ -65,7 +65,10 @@ Route::prefix('account')->middleware('auth')->group(function () {
 
     Route::prefix('withdrawal')->group(function () {
         Route::get('', [WithdrawalController::class, 'create'])
-            ->name('withdrawal');
+        ->name('withdrawal');
+
+        Route::get('create', [WithdrawalController::class, 'create'])
+            ->name('withdrawal.create');
 
         Route::post('', [WithdrawalController::class, 'store'])
             ->name('withdrawal.store');

@@ -2,58 +2,64 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
+use App\Models\Wallet;
+use App\Models\Currency;
+use App\Models\Transaction;
+use App\Models\PaymentSystem;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class Withdrawal extends Model
 {
     use HasFactory;
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
+        'uuid',
+        'external_id',
         'user_id',
-        'payment_system',
-        'details',
+        'wallet_id',
+        'payment_system_id',
+        'currency_id',
         'amount',
-        'amount_default_currency',
-        'currency',
-        'approved',
-        'canceled',
+        'processing_fee',
+        'amount_in_base_currency',
+        'recipient_data',
+        'metadata',
+        'status',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
-        'approved' => 'boolean',
-        'canceled' => 'boolean',
+        'amount' => 'decimal:8',
+        'processing_fee' => 'decimal:8',
+        'amount_in_base_currency' => 'decimal:8',
+        'metadata' => 'array',
+        'processed_at' => 'datetime',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function paymentSystem(): BelongsTo
+    public function wallet()
     {
-        return $this->belongsTo(PaymentSystem::class, 'payment_system');
+        return $this->belongsTo(Wallet::class);
     }
 
-    /**
-     * @return HasOne
-     */
-    public function transaction(): HasOne
+    public function paymentSystem()
     {
-        return $this->hasOne(Transaction::class, 'withdrawal_id');
+        return $this->belongsTo(PaymentSystem::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class);
     }
 }

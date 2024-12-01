@@ -15,16 +15,23 @@ use Illuminate\Support\Facades\Redirect;
 
 class WithdrawalController extends Controller
 {
+
+    public function index()
+    {
+        return 'ok';
+    }
+
     public function create()
     {
         $user = Auth::user();
-        $merchants = $user->merchants->where('balance', '>', 0);
-        $paymentSystems = PaymentSystem::where('has_withdrawal', true)
+        $wallets = $user->wallets()->where('balance', '>', 0)->with('currency')->get();
+        $paymentSystems = PaymentSystem::where('is_active', true)
+            ->where('type', 'both')
+            ->with('currency')
             ->get();
 
-
         return Inertia::render('Dashboard/Withdrawal/Create', [
-            'merchants' => $merchants,
+            'wallets' => $wallets->toArray(),
             'paymentSystems' => $paymentSystems,
         ]);
     }

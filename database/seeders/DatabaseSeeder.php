@@ -4,15 +4,34 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\AdminSeeder;
+use Database\Seeders\WalletSeeder;
+use Database\Seeders\PaymentSeeder;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\MerchantSeeder;
+use Database\Seeders\WithdrawalSeeder;
+use Database\Seeders\TransactionSeeder;
+use Database\Seeders\ExchangeRateSeeder;
+use Database\Seeders\PaymentSystemSeeder;
+
+
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        \App\Models\Admin::factory(1)->create();
-        \App\Models\PaymentSystem::factory(5)->create();
+        $this->call([
+            AdminSeeder::class,
+            UserSeeder::class,
+            CurrencySeeder::class,
+            WalletSeeder::class,
+            MerchantSeeder::class,
+            PaymentSystemSeeder::class,
+            PaymentSeeder::class,
+            WithdrawalSeeder::class,
+            TransactionSeeder::class,
+            ExchangeRateSeeder::class,
+        ]);
     }
 }

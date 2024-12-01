@@ -2,60 +2,61 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Currency;
+use App\Models\Merchant;
+use App\Models\Transaction;
+use App\Models\PaymentSystem;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class Payment extends Model
 {
     use HasFactory;
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
-        'm_id',
+        'uuid',
+        'external_id',
+        'merchant_id',
+        'payment_system_id',
+        'currency_id',
+        'order_id',
         'amount',
-        'amount_default_currency',
-        'currency',
-        'order',
-        'username',
-        'payment_system',
-        'pay_screen',
-        'approved',
-        'canceled',
+        'processing_fee',
+        'amount_in_base_currency',
+        'payer_email',
+        'payer_phone',
+        'metadata',
+        'status',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
-        'approved' => 'boolean',
-        'canceled' => 'boolean',
+        'amount' => 'decimal:8',
+        'processing_fee' => 'decimal:8',
+        'amount_in_base_currency' => 'decimal:8',
+        'metadata' => 'array',
+        'expires_at' => 'datetime',
+        'processed_at' => 'datetime',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function merchant(): BelongsTo
+    public function merchant()
     {
-        return $this->belongsTo(Merchant::class, 'm_id', 'm_id');
+        return $this->belongsTo(Merchant::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function system(): BelongsTo
+    public function paymentSystem()
     {
-        return $this->belongsTo(PaymentSystem::class, 'payment_system');
+        return $this->belongsTo(PaymentSystem::class);
     }
 
-    /**
-     * @return HasOne
-     */
-    public function transaction(): HasOne
+    public function currency()
     {
-        return $this->hasOne(Transaction::class, 'payment_id');
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class);
     }
 }
+

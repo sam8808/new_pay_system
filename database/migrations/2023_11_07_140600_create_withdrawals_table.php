@@ -12,33 +12,35 @@ return new class extends Migration {
     {
         Schema::create('withdrawals', function (Blueprint $table) {
             $table->id();
-
-            $table->bigInteger('user_id')->unsigned();
-            $table->bigInteger('payment_system')->unsigned();
-            $table->string('details');
-
-            $table->decimal('amount');
-            $table->decimal('amount_default_currency')->default(0);
-            $table->string('currency');
-
-            $table->boolean('approved')->default(false);
-            $table->boolean('canceled')->default(false);
-
+            $table->uuid('uuid')->unique();
+            $table->string('external_id')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('wallet_id')->constrained()->onDelete('cascade');
+            $table->foreignId('payment_system_id')->constrained()->onDelete('cascade');
+            $table->foreignId('currency_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 20, 8);
+            $table->decimal('processing_fee', 20, 8)->default(0);
+            $table->decimal('amount_in_base_currency', 20, 8);
+            $table->string('recipient_data');
+            $table->json('metadata')->nullable();
+            $table->enum('status', [
+                'pending',
+                'processing',
+                'completed',
+                'failed',
+                'canceled'
+            ])->default('pending');
+            $table->timestamp('processed_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
-
-            $table->foreign('payment_system')
-                ->references('id')
-                ->on('payment_systems')
-                ->onDelete('cascade');
-
-            $table->index('user_id');
-            $table->index('payment_system');
+            $table->index('uuid');
+            $table->index('external_id');
+            $table->index(['user_id', 'status']);
+            $table->index('wallet_id');
+            $table->index('payment_system_id');
+            $table->index('status');
         });
+        
     }
 
     /**

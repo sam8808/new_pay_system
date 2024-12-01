@@ -12,46 +12,39 @@ return new class extends Migration {
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-
-            $table->bigInteger('user_id')->unsigned();
-            $table->bigInteger('m_id')->unsigned();
-            $table->unsignedBigInteger('payment_id')->nullable();
-            $table->unsignedBigInteger('withdrawal_id')->nullable();
-
-            $table->decimal('amount');
-            $table->string('currency');
-            $table->string('type');
-
-            $table->boolean('confirmed')->default(false);
-            $table->boolean('canceled')->default(false);
-
+            $table->uuid('uuid')->unique();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('wallet_id')->constrained()->onDelete('cascade');
+            $table->foreignId('currency_id')->constrained()->onDelete('cascade');
+            $table->foreignId('payment_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('withdrawal_id')->nullable()->constrained()->onDelete('cascade');
+            $table->decimal('amount', 20, 8);
+            $table->decimal('fee', 20, 8)->default(0);
+            $table->decimal('amount_in_base_currency', 20, 8);
+            $table->enum('type', [
+                'deposit',
+                'withdrawal',
+                'transfer',
+                'exchange',
+                'fee',
+                'referral',
+                'refund'
+            ]);
+            $table->enum('status', [
+                'pending',
+                'completed',
+                'failed',
+                'canceled'
+            ])->default('pending');
+            $table->json('metadata')->nullable();
             $table->timestamps();
 
-            $table->foreign('m_id')
-                ->references('id')
-                ->on('merchants')
-                ->onDelete('cascade');
-
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
-
-            $table->foreign('payment_id')
-                ->references('id')
-                ->on('payments')
-                ->onDelete('cascade');
-
-            $table->foreign('withdrawal_id')
-                ->references('id')
-                ->on('withdrawals')
-                ->onDelete('cascade');
-
-            $table->index('id');
-            $table->index('m_id');
+            $table->index('uuid');
+            $table->index(['user_id', 'type', 'status']);
+            $table->index('wallet_id');
             $table->index('payment_id');
             $table->index('withdrawal_id');
-            $table->index('type');
+            $table->index(['type', 'status']);
         });
     }
 

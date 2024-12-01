@@ -2,70 +2,62 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
+use App\Models\Wallet;
+use App\Models\Payment;
+use App\Models\Currency;
+use App\Models\Withdrawal;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transaction extends Model
 {
     use HasFactory;
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
-        'm_id',
+        'uuid',
         'user_id',
+        'wallet_id',
+        'currency_id',
         'payment_id',
         'withdrawal_id',
         'amount',
+        'fee',
+        'amount_in_base_currency',
         'type',
-        'currency',
-        'confirmed',
-        'canceled',
+        'status',
+        'metadata',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
-        'confirmed' => 'boolean',
-        'canceled' => 'boolean',
+        'amount' => 'decimal:8',
+        'fee' => 'decimal:8',
+        'amount_in_base_currency' => 'decimal:8',
+        'metadata' => 'array',
     ];
 
-
-    /**
-     * @return BelongsTo
-     */
-    public function merchant(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(Merchant::class, 'm_id');
+        return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return HasOne
-     */
-    public function payment(): HasOne
+    public function wallet()
     {
-        return $this->hasOne(Payment::class, 'id', 'payment_id');
+        return $this->belongsTo(Wallet::class);
     }
 
-    /**
-     * @return HasOne
-     */
-    protected function withdrawal(): HasOne
+    public function currency()
     {
-        return $this->hasOne(Withdrawal::class, 'id', 'withdrawal_id');
+        return $this->belongsTo(Currency::class);
     }
 
-    protected function user(): HasOne
+    public function payment()
     {
-        return $this->hasOne(User::class, 'id', 'user_id');
+        return $this->belongsTo(Payment::class);
     }
 
-    public function response(): HasOne
+    public function withdrawal()
     {
-        return $this->hasOne(ClientResponse::class, 'transaction_id');
+        return $this->belongsTo(Withdrawal::class);
     }
 }

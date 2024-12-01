@@ -1,0 +1,46 @@
+sequenceDiagram
+    participant M as Мерчант (сайт магазина)
+    participant GW as Наш платёжный шлюз
+    participant DB as База данных шлюза
+    participant PS as Платёжная система
+    participant C as Покупатель
+    
+    Note over M,PS: Этап 1: Инициализация платежа
+    
+    M->>GW: 1. Создание платежа<br/>POST /api/v1/create-payment<br/>{shop_id, amount, order_id, callback_url}
+    
+    GW->>GW: 2. Проверка подписи запроса и<br/>авторизация мерчанта
+    
+    GW->>DB: 3. Сохранение платежа<br/>status: NEW<br/>payment_id: UUID
+    
+    GW->>PS: 4. Регистрация платежа в ПС<br/>{amount, currency, description}
+    PS-->>GW: 5. payment_form_url, ps_payment_id
+    
+    GW->>DB: 6. Обновление данных платежа<br/>ps_payment_id, form_url
+    
+    GW-->>M: 7. Ответ с платёжной ссылкой<br/>{payment_id, payment_form_url}
+    
+    Note over M,PS: Этап 2: Оплата
+    
+    M->>C: 8. Редирект на форму оплаты
+    C->>PS: 9. Ввод платёжных данных
+    
+    Note over PS,M: Этап 3: Обработка результата
+    
+    alt Успешная оплата
+        PS->>GW: 10а. Уведомление об успехе<br/>payment.success
+        GW->>DB: 11а. Статус: SUCCESS
+        GW->>M: 12а. Уведомление мерчанта<br/>об успешной оплате
+        PS->>C: 13а. Возврат на success_url
+    else Неуспешная оплата
+        PS->>GW: 10б. Уведомление о неудаче<br/>payment.failed
+        GW->>DB: 11б. Статус: FAILED
+        GW->>M: 12б. Уведомление мерчанта<br/>о неуспешной оплате
+        PS->>C: 13б. Возврат на fail_url
+    end
+    
+    Note over M,PS: Этап 4: Финансовое завершение
+    
+    PS->>GW: 14. Подтверждение финансовой<br/>транзакции (settlement)
+    GW->>DB: 15. Обновление финансового<br/>статуса платежа
+    GW->>M: 16. Уведомление о финансовом<br/>завершении операции

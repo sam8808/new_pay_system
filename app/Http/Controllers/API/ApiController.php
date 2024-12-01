@@ -4,189 +4,105 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Payment;
 use App\Models\Merchant;
-use App\Models\Transaction;
-use Illuminate\Http\Request;
 use App\Models\PaymentSystem;
-use Illuminate\Http\JsonResponse;
-use App\Services\FileUploadService;
-use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
+use App\Services\PaymentService;
+use App\Services\SignatureService;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Foundation\Application;
-use Illuminate\Validation\ValidationException;
 
 class ApiController extends Controller
 {
+    public function __construct(
+        private PaymentService $paymentService,
+        private SignatureService $signatureService
+    ) {}
 
-    /**
-     * @param Request $request
-     * @return View|Application|Factory|JsonResponse|\Illuminate\Contracts\Foundation\Application
-     */
-    public function index(Request $request): View|Application|Factory|JsonResponse|\Illuminate\Contracts\Foundation\Application
+    public function index(Request $request)
     {
-        $merchant = Merchant::approvedAndActivated()
-            ->where('m_id', $request->session()->get('shop'))
-            ->first();
+        $merchant = $this->getApprovedMerchant($request);
+        if (!$merchant) {
+            return response()->json(['error' => 'Merchant not found'], 404);
+        }
 
-        dd($request->method());
+        $sessionData = $request->only('order', 'amount', 'currency', 'user_identify');
+        $request->session()->put(['data' => $sessionData]);
 
-        $request->session()->put(['data' => $request->only('order', 'amount', 'currency', 'username')]);
-
-        $paymentSystems = PaymentSystem::query()
-            ->where('currency', $request->only('currency'))
+        $paymentSystems = PaymentSystem::where('currency', $sessionData['currency'])
             ->where('activated', true)
-            // ->when($this->shouldExcludeById($request->input('amount')), function ($query) {
-            //     return $query->whereNotIn('title', ['Card AZ']);
-            // })
             ->get();
 
-
         return view('api.index', [
-            'data' => (object)$request->only('order', 'amount', 'currency', 'username'),
+            'data' => (object)$sessionData,
             'paymentSystems' => $paymentSystems,
             'shop' => $merchant,
         ]);
     }
 
-
-    /**
-     * @param Request $request
-     * @return View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-     */
-    public function pay(Request $request): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
-    {
-        $request->validate([
-            'payment_system' => ['required'],
-        ]);
-
-        $data = (object)$request->session()->get('data');
-
-        $paymentSystem = PaymentSystem::find($request->get('payment_system'));
-
-
-        $payment = Payment::create([
-            'm_id' => $request->session()->get('shop'),
-            'amount' => $data->amount,
-            'currency' => $data->currency,
-            'order' => $data->order,
-            'username' => $data->username,
-            'payment_system' => $paymentSystem->id,
-        ]);
-
-
-        $details = $paymentSystem->infos->reduce(function ($carry, $info) {
-            if ($carry === null || $info->usage_count < $carry->usage_count) {
-                return $info;
-            }
-            return $carry;
-        }, null);
-
-        $request->session()->put('details', $details);
-
-        return view('api.pay', [
-            'paymentSystem' => $paymentSystem,
-            'details' => $details,
-            'payment' => $payment,
-        ]);
-    }
-
-
-    /**
-     * @param Request $request
-     * @param $id
-     * @return JsonResponse
-     */
-    public function sendOrder(Request $request, $id): JsonResponse
+    public function pay(Request $request)
     {
         try {
-            $request->validate([
-                'order' => ['required', 'image', 'mimes:jpeg,png,jpg,gif'],
+            $request->validate(['payment_system' => ['required']]);
+
+            $data = (object)$request->session()->get('data');
+            if (!$data) {
+                return response()->json(['error' => 'Payment data not found'], 422);
+            }
+
+            $paymentSystem = PaymentSystem::findOrFail($request->get('payment_system'));
+
+            // Создаем платеж
+            $payment = $this->paymentService->initializePayment([
+                'merchant' => $request->session()->get('shop'),
+                'amount' => $data->amount,
+                'currency' => $data->currency,
+                'order' => $data->order,
+                'user_identify' => $data->user_identify ?? null,
+            ], $paymentSystem);
+
+            if ($paymentSystem->provider) {
+                // Для автоматических платежей возвращаем URL для оплаты
+                return response()->json([
+                    'payment_id' => $payment->id,
+                    'redirect_url' => $payment->payment_url
+                ]);
+            }
+
+            // Для ручных платежей показываем форму
+            return view('api.pay', [
+                'paymentSystem' => $paymentSystem,
+                'payment' => $payment
             ]);
-
-            $fileUpload = new FileUploadService($request->file('order'), 'orders');
-            $fileUpload->upload();
-
-            $payment = Payment::find($id);
-            $payment->pay_screen = $fileUpload->getFileName();
-            $payment->save();
-
-            $details = $request->session()->get('details');
-            $details->increment('usage_count');
-
-
-            $transaction = Transaction::create([
-                'm_id' => $payment->merchant->id,
-                'user_id' => $payment->merchant->user_id,
-                'amount' => $payment->amount,
-                'currency' => $payment->currency,
-                'type' => 'payIn',
-                'payment_id' => $payment->id,
+        } catch (\Exception $e) {
+            Log::error('Payment creation failed', [
+                'error' => $e->getMessage()
             ]);
-            $request->session()->put('transaction', $transaction->id);
-        } catch (ValidationException $e) {
-            return response()->json($e->errors(), 422);
+            return response()->json(['error' => 'Payment creation failed'], 500);
         }
-
-        return response()->json(['message' => 'Success'], 200);
     }
 
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function payConfirm(Request $request): JsonResponse
+    public function status(Request $request, Payment $payment)
     {
-        $transaction = Transaction::find($request->session()->get('transaction'));
-
-        if ($transaction->payment->approved) {
-            return response()->json(['message' => 'Success'], 200);
+        // Проверяем подпись запроса
+        if (!$this->signatureService->verifySignature(
+            ['payment_id' => $payment->id],
+            $request->get('signature'),
+            $payment->merchant->m_key
+        )) {
+            return response()->json(['error' => 'Invalid signature'], 401);
         }
 
-        if ($transaction->payment->canceled && $transaction->canceled) {
-            return response()->json(['message' => 'Cancel'], 200);
-        }
-
-        return response()->json(['message' => 'Waiting'], 200);
+        return response()->json([
+            'status' => $payment->status,
+            'payment_id' => $payment->id,
+            'order' => $payment->order
+        ]);
     }
 
-    //    public function payConfirmManual(Request $request, $id): RedirectResponse
-    //    {
-    //        $transaction = Transaction::find($id);
-    //
-    //        if ($transaction->payment->approved) {
-    //            $transaction->confirmed = true;
-    //            $transaction->save();
-    //            $this->sendAsyncRequest($transaction);
-    //        }
-    //
-    //        return back();
-    //    }
-
-    /**
-     * @param Request $request
-     * @param $action
-     * @return RedirectResponse
-     */
-    public function redirect(Request $request, $action)
+    private function getApprovedMerchant(Request $request)
     {
-        $transaction = Transaction::find($request->session()->get('transaction'));
-        $request->session()->flush();
-
-        if ($action === 'approve') {
-            return redirect()->to($transaction->merchant->success_url);
-        }
-
-        return redirect()->to($transaction->merchant->fail_url);
-    }
-
-    /**
-     * @param $amount
-     * @return bool
-     */
-    private function shouldExcludeById($amount): bool
-    {
-        return $amount < 10;
+        return Merchant::approvedAndActivated()
+            ->where('m_id', $request->session()->get('shop'))
+            ->first();
     }
 }

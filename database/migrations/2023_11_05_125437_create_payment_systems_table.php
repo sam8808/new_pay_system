@@ -14,13 +14,24 @@ return new class extends Migration
         Schema::create('payment_systems', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->text('desc')->nullable();
-            $table->string('url');
-            $table->string('logo');
-            $table->string('currency');
-            $table->boolean('has_withdrawal')->default(false);
-            $table->boolean('activated',)->default(true);
+            $table->string('code')->unique();
+            $table->text('description')->nullable();
+            $table->string('provider')->nullable();
+            $table->json('provider_settings')->nullable();
+            $table->string('logo')->nullable();
+            $table->foreignId('currency_id')->constrained()->onDelete('cascade');
+            $table->enum('type', ['payment', 'withdrawal', 'both'])->default('both');
+            $table->decimal('min_amount', 20, 8)->default(0);
+            $table->decimal('max_amount', 20, 8)->nullable();
+            $table->decimal('processing_fee', 8, 4)->default(0);
+            $table->integer('processing_time')->default(0); // In minutes
+            $table->boolean('is_active')->default(true);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
+
+            $table->index(['type', 'is_active']);
+            $table->index('currency_id');
+            $table->index('sort_order');
         });
     }
 

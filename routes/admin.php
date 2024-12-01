@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\MainController;
 use App\Http\Controllers\Admin\MerchantController;
@@ -11,6 +12,23 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware('admin.auth')->group(function () {
+
+    Route::prefix('currency')->group(function () {
+        Route::get('', [CurrencyController::class, 'index'])
+            ->name('admin.currency');
+
+        Route::get('add', [CurrencyController::class, 'create'])
+            ->name('admin.currency.create');
+
+        Route::post('', [CurrencyController::class, 'store'])
+            ->name('admin.currency.store');
+
+        Route::post('change-status/{currency}', [CurrencyController::class, 'changeStatus'])
+            ->name('admin.currency.changeStatus');
+    });
+
+
+
     Route::get('/', [MainController::class, 'index'])
         ->name('admin');
 
