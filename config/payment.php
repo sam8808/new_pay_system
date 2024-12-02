@@ -5,7 +5,7 @@ return [
     'providers' => [
         'test' => [
             'name' => 'Test Provider',
-            'class' => \App\Services\Providers\TestProvider::class,
+            // 'class' => \App\Services\Providers\TestProvider::class,
             'webhook_secret' => env('TEST_PROVIDER_WEBHOOK_SECRET'),
             'api_key' => env('TEST_PROVIDER_API_KEY'),
         ]
