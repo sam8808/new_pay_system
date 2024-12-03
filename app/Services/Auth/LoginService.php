@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginService
 {
-    private const MAX_LOGIN_ATTEMPTS = 5;
+    private const MAX_LOGIN_ATTEMPTS = 100;
     private const BLOCK_DURATION = 15;
     private const CACHE_KEY_PREFIX = 'login_attempts_';
 
