@@ -11,6 +11,7 @@ import {
     AlertCircle,
     Ban,
     Power,
+    Check
 } from "lucide-vue-next";
 
 const props = defineProps({
@@ -34,38 +35,17 @@ const handleActivation = () => {
 };
 
 const getMerchantStatus = (merchant) => {
-    if (merchant.banned) {
+    if (merchant.is_active) {
         return {
-            icon: Ban,
-            class: "bg-red-50 text-red-700",
-            text: "Заблокировано",
-        };
-    }
-    if (merchant.rejected) {
-        return {
-            icon: XCircle,
-            class: "bg-red-50 text-red-700",
-            text: "Отказано",
-        };
-    }
-    if (!merchant.approved) {
-        return {
-            icon: AlertCircle,
-            class: "bg-yellow-50 text-yellow-700",
-            text: "На модерации",
-        };
-    }
-    if (merchant.activated) {
-        return {
-            icon: CheckCircle,
+            icon: Check,
             class: "bg-emerald-50 text-emerald-700",
-            text: "Активный",
+            text: "Подключен",
         };
     }
     return {
-        icon: Power,
-        class: "bg-gray-50 text-gray-700",
-        text: "Неактивный",
+        icon: AlertCircle,
+        class: "bg-yellow-50 text-yellow-700",
+        text: "Отключен",
     };
 };
 </script>
@@ -91,7 +71,7 @@ const getMerchantStatus = (merchant) => {
                                 >
                                     Магазин -
                                     <span class="text-violet-600">{{
-                                        merchant.m_id
+                                        merchant.merchant_id
                                     }}</span>
                                 </h1>
                                 <div
@@ -228,7 +208,7 @@ const getMerchantStatus = (merchant) => {
                 </div>
 
                 <!-- Действия -->
-                <div
+                <!-- <div
                     class="flex justify-center p-6 bg-gray-50/80 border-t border-gray-100 backdrop-blur-sm"
                 >
                     <div
@@ -241,7 +221,7 @@ const getMerchantStatus = (merchant) => {
                         ]"
                     >
                         <component
-                            :is="merchant.rejected ? XCircle : Ban"
+                            :is="!merchant.is_active ? XCircle : Ban"
                             class="w-4 h-4"
                         />
                         {{ merchant.rejected ? "Отказано" : "Заблокировано" }}
@@ -252,13 +232,13 @@ const getMerchantStatus = (merchant) => {
                         @click="handleActivation"
                         :class="[
                             'inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-medium gap-2 transition-all duration-300',
-                            merchant.activated
+                            merchant.is_active
                                 ? 'bg-red-50 text-red-700 hover:bg-red-100'
                                 : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
                         ]"
                     >
                         <Power class="w-4 h-4" />
-                        {{ merchant.activated ? "Отключить" : "Активировать" }}
+                        {{ merchant.is_active ? "Отключить" : "Активировать" }}
                     </button>
 
                     <div
@@ -268,7 +248,7 @@ const getMerchantStatus = (merchant) => {
                         <AlertCircle class="w-4 h-4" />
                         На модерации
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </AccountLayout>

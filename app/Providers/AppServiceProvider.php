@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\CurrencyApiService;
+use App\Services\CurrencyRateService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(CurrencyRateService::class, function ($app) {
+            return new CurrencyRateService(new CurrencyApiService());
+        });
     }
 
     /**

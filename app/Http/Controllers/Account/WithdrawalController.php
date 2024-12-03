@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Dashboard;
+namespace App\Http\Controllers\Account;
 
 use Inertia\Inertia;
 use App\Models\Merchant;
@@ -30,7 +30,7 @@ class WithdrawalController extends Controller
             ->with('currency')
             ->get();
 
-        return Inertia::render('Dashboard/Withdrawal/Create', [
+        return Inertia::render('Account/Withdrawal/Create', [
             'wallets' => $wallets->toArray(),
             'paymentSystems' => $paymentSystems,
         ]);

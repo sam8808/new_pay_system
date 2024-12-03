@@ -29,12 +29,17 @@ const navigationItems = [
     },
     {
         name: "Транзакции",
-        route: "transactions",
+        route: "transaction",
         icon: History,
     },
     {
         name: "Мерчант",
         route: "merchant",
+        icon: Building,
+    }, 
+       {
+        name: "Пополнение",
+        route: "deposit",
         icon: Building,
     },
     {

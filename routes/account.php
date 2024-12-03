@@ -1,11 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Dashboard\MainController;
-use App\Http\Controllers\Dashboard\OrderController;
-use App\Http\Controllers\Dashboard\ProfileController;
-use App\Http\Controllers\Dashboard\MerchantController;
-use App\Http\Controllers\Dashboard\WithdrawalController;
+use App\Http\Controllers\Account\MainController;
+use App\Http\Controllers\Account\OrderController;
+use App\Http\Controllers\Account\DepositController;
+use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Account\MerchantController;
+use App\Http\Controllers\Account\WithdrawalController;
+use App\Http\Controllers\Account\TransactionController;
+
 
 
 
@@ -13,12 +16,6 @@ Route::prefix('account')->middleware('auth')->group(function () {
 
     Route::get('', [MainController::class, 'index'])
         ->name('dashboard');
-
-    Route::get('transactions', [MainController::class, 'transactions'])
-        ->name('transactions');
-
-    Route::get('{id}/transaction', [MainController::class, 'transaction'])
-        ->name('transaction');
 
     Route::get('partners', [MainController::class, 'partners'])
         ->name('partners');
@@ -41,7 +38,7 @@ Route::prefix('account')->middleware('auth')->group(function () {
         Route::get('', [MerchantController::class, 'index'])
             ->name('merchant');
 
-        Route::get('{id}/show', [MerchantController::class, 'show'])
+        Route::get('{merchant}/show', [MerchantController::class, 'show'])
             ->name('merchant.show');
 
         Route::get('create', [MerchantController::class, 'create'])
@@ -50,22 +47,33 @@ Route::prefix('account')->middleware('auth')->group(function () {
         Route::post('store', [MerchantController::class, 'store'])
             ->name('merchant.store');
 
-        Route::get('{id}/edit', [MerchantController::class, 'edit'])
+        Route::get('{merchant}/edit', [MerchantController::class, 'edit'])
             ->name('merchant.edit');
 
-        Route::post('{id}/update', [MerchantController::class, 'update'])
+        Route::post('{merchant}/update', [MerchantController::class, 'update'])
             ->name('merchant.update');
 
-        Route::post('{id}/activate', [MerchantController::class, 'activateOrDeactivate'])
+        Route::post('{merchant}/activate', [MerchantController::class, 'activateOrDeactivate'])
             ->name('merchant.activate');
 
-        Route::post('{id}/delete', [MerchantController::class, 'destroy'])
+        Route::post('{merchant}/delete', [MerchantController::class, 'destroy'])
             ->name('merchant.destroy');
+    });
+
+    Route::prefix('deposit')->group(function () {
+        Route::get('', [DepositController::class, 'index'])
+            ->name('deposit');
+
+        Route::post('', [DepositController::class, 'store'])
+            ->name('deposit.store');
+
+        Route::get('{uuid}', [DepositController::class, 'show'])
+            ->name('deposit.show');
     });
 
     Route::prefix('withdrawal')->group(function () {
         Route::get('', [WithdrawalController::class, 'create'])
-        ->name('withdrawal');
+            ->name('withdrawal');
 
         Route::get('create', [WithdrawalController::class, 'create'])
             ->name('withdrawal.create');
@@ -73,6 +81,12 @@ Route::prefix('account')->middleware('auth')->group(function () {
         Route::post('', [WithdrawalController::class, 'store'])
             ->name('withdrawal.store');
     });
+
+    Route::get('transaction', [TransactionController::class, 'index'])
+        ->name('transaction');
+
+    Route::get('{id}/transaction', [TransactionController::class, 'show'])
+        ->name('transaction.show');
 
     Route::get('orders', [OrderController::class, 'index'])
         ->name('user.orders');

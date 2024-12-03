@@ -33,6 +33,7 @@ class Merchant extends Model
         'processing_fee' => 'decimal:4',
         'is_active' => 'boolean',
         'is_succes_moderation' => 'boolean',
+        'created_at' => 'datetime:Y-m-d H:i:s'
     ];
 
 

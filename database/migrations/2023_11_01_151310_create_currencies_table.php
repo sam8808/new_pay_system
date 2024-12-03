@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('max_amount', 20, 8)->nullable();
             $table->decimal('processing_fee', 8, 4)->default(0); // Percentage
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_base')->default(false);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
 

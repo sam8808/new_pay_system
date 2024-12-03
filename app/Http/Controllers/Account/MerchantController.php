@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Dashboard;
+namespace App\Http\Controllers\Account;
 
 use Inertia\Inertia;
 use App\Models\Merchant;
@@ -20,18 +20,18 @@ class MerchantController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        return Inertia::render('Dashboard/Merchant/Index', [
+        return Inertia::render('Account/Merchant/Index', [
             'merchants' => $merchants
         ]);
     }
 
 
 
-    public function show($id)
+    public function show($merchant)
     {
-        $merchant = Merchant::find($id);
+        $merchant = Merchant::find($merchant);
 
-        return Inertia::render('Dashboard/Merchant/Show', [
+        return Inertia::render('Account/Merchant/Show', [
             'merchant' => $merchant
         ]);
     }
@@ -39,7 +39,7 @@ class MerchantController extends Controller
 
     public function create()
     {
-        return Inertia::render('Dashboard/Merchant/Create');
+        return Inertia::render('Account/Merchant/Create');
     }
 
 
@@ -53,19 +53,19 @@ class MerchantController extends Controller
 
 
 
-    public function edit($id)
+    public function edit($merchant)
     {
-        $merchant = Merchant::find($id);
+        $merchant = Merchant::find($merchant);
 
-        return Inertia::render('Dashboard/Merchant/Edit', [
+        return Inertia::render('Account/Merchant/Edit', [
             'merchant' => $merchant
         ]);
     }
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $merchant)
     {
-        $merchant = Merchant::find($id);
+        $merchant = Merchant::find($merchant);
         $merchant->update($request->all());
 
         return back();
@@ -73,19 +73,19 @@ class MerchantController extends Controller
 
 
 
-    public function activateOrDeactivate($id)
+    public function activateOrDeactivate($merchant)
     {
-        $merchant = Merchant::find($id);
-        $merchant->activated = !$merchant->activated;
+        $merchant = Merchant::find($merchant);
+        $merchant->is_active = !$merchant->is_active;
         $merchant->save();
 
         return back();
     }
 
 
-    public function destroy($id)
+    public function destroy($merchant)
     {
-        $merchant = Merchant::find($id);
+        $merchant = Merchant::find($merchant);
         $merchant->delete();
 
         return redirect()->route('merchant');

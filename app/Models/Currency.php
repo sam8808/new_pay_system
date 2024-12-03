@@ -15,11 +15,21 @@ class Currency extends Model
         'symbol',
         'type',
         'icon',
-        'status'
+        'is_active',
+        'is_base',
     ];
 
 
     protected $casts = [
-        'status' => 'boolean',
+        'is_active' => 'boolean',
+        'is_base' => 'boolean'
+
     ];
+
+    
+
+    public function scopeBase($query)
+    {
+        return $query->where('is_base', true);
+    }
 }

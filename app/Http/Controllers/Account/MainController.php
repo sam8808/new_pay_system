@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Dashboard;
+namespace App\Http\Controllers\Account;
 
 use Inertia\Inertia;
 use App\Models\Transaction;
@@ -18,13 +18,13 @@ class MainController extends Controller
         $wallets = $user->wallets()
             ->with('currency')
             ->get();
-        
+
         $merchants = $user->merchants();
 
         // Базовая статистика
         $stats = [
             'merchantsCount' => $merchants->count(),
-            
+
             // Входящие платежи за сегодня
             'todayIncome' => Payment::whereIn('merchant_id', $merchants->pluck('id'))
                 ->where('status', 'completed')
@@ -40,10 +40,12 @@ class MainController extends Controller
 
         // Последние транзакции
         $recentTransactions = Transaction::where('user_id', $user->id)
-            ->with(['payment:id,merchant_id,amount,currency_id,status', 
-                   'withdrawal:id,amount,currency_id,status',
-                   'currency:id,code,symbol',
-                   'wallet:id,currency_id'])
+            ->with([
+                'payment:id,merchant_id,amount,currency_id,status',
+                'withdrawal:id,amount,currency_id,status',
+                'currency:id,code,symbol',
+                'wallet:id,currency_id'
+            ])
             ->latest()
             ->take(5)
             ->get()
@@ -79,8 +81,8 @@ class MainController extends Controller
             // Статистика по мерчантам
             'merchantsStats' => [
                 'active' => $merchants->where('is_active', true)
-                           ->where('is_succes_moderation', true)
-                           ->count(),
+                    ->where('is_succes_moderation', true)
+                    ->count(),
                 'total' => $merchants->count()
             ],
 
@@ -97,7 +99,7 @@ class MainController extends Controller
                 ->sum('amount_in_base_currency')
         ];
 
-        return Inertia::render('Dashboard/Index', [
+        return Inertia::render('Account/Index', [
             'wallets' => $wallets,
             'stats' => $stats,
             'recentTransactions' => $recentTransactions,
@@ -116,16 +118,16 @@ class MainController extends Controller
             )
             ->first();
 
-        return $stats->total > 0 
-            ? round(($stats->completed / $stats->total) * 100) 
+        return $stats->total > 0
+            ? round(($stats->completed / $stats->total) * 100)
             : 0;
     }
 
     private function getRelatedTransactionInfo($transaction)
     {
-        switch($transaction->type) {
+        switch ($transaction->type) {
             case 'deposit':
-                return $transaction->payment 
+                return $transaction->payment
                     ? ['payment_id' => $transaction->payment->id]
                     : null;
             case 'withdrawal':
@@ -137,31 +139,8 @@ class MainController extends Controller
         }
     }
 
-    public function transactions()
-    {
-        $transactions = Transaction::where('user_id', Auth::user()->id)
-            ->with(['payment', 'withdrawal', 'currency', 'wallet'])
-            ->orderByDesc('created_at')
-            ->paginate(10);
-
-        return Inertia::render('Dashboard/Transactions', [
-            'transactions' => $transactions
-        ]);
-    }
-
-    public function transaction($uuid)
-    {
-        $transaction = Transaction::where('uuid', $uuid)
-            ->with(['payment', 'withdrawal', 'currency', 'wallet'])
-            ->firstOrFail();
-
-        return Inertia::render('Dashboard/Transaction', [
-            'transaction' => $transaction
-        ]);
-    }
-
     public function partners()
     {
-        return Inertia::render('Dashboard/Partners');
+        return Inertia::render('Account/Partners');
     }
 }

@@ -13,21 +13,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payment extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'uuid',
-        'external_id',
         'merchant_id',
         'payment_system_id',
         'currency_id',
-        'order_id',
+        'order_id', // ID заказа в системе мерчанта
         'amount',
         'processing_fee',
         'amount_in_base_currency',
+        'status',
+        'external_id',
         'payer_email',
         'payer_phone',
         'metadata',
-        'status',
+        'expires_at',
+        'processed_at'
     ];
 
     protected $casts = [
@@ -39,24 +40,20 @@ class Payment extends Model
         'processed_at' => 'datetime',
     ];
 
-    public function merchant()
-    {
-        return $this->belongsTo(Merchant::class);
-    }
-
-    public function paymentSystem()
-    {
-        return $this->belongsTo(PaymentSystem::class);
-    }
 
     public function currency()
     {
         return $this->belongsTo(Currency::class);
     }
 
+
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
+    }
+
     public function transaction()
     {
-        return $this->hasOne(Transaction::class);
+        return $this->morphOne(Transaction::class, 'transactionable');
     }
 }
-

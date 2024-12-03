@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use App\Models\Wallet;
-use App\Models\Payment;
-use App\Models\Currency;
-use App\Models\Withdrawal;
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transaction extends Model
@@ -19,15 +17,17 @@ class Transaction extends Model
         'user_id',
         'wallet_id',
         'currency_id',
-        'payment_id',
-        'withdrawal_id',
+        'transactionable_type',
+        'transactionable_id',
         'amount',
         'fee',
         'amount_in_base_currency',
-        'type',
+        'type', // deposit, payment, withdrawal, transfer, exchange
         'status',
-        'metadata',
+        'metadata'
     ];
+
+
 
     protected $casts = [
         'amount' => 'decimal:8',
@@ -36,28 +36,24 @@ class Transaction extends Model
         'metadata' => 'array',
     ];
 
-    public function user()
+
+    public function transactionable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function wallet()
+    public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
     }
 
-    public function currency()
+    public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
-    }
-
-    public function payment()
-    {
-        return $this->belongsTo(Payment::class);
-    }
-
-    public function withdrawal()
-    {
-        return $this->belongsTo(Withdrawal::class);
     }
 }

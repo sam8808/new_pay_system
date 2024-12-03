@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Dashboard;
+namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
 
 class PaymentController extends Controller
 {
-    //
+    public function index() 
+    {
+        
+    }
 }
