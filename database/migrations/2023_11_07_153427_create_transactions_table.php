@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('user_id')->nullable(); 
             $table->decimal('amount', 20, 8);
             $table->decimal('fee', 20, 8)->default(0);
             $table->decimal('amount_in_base_currency', 20, 8);
@@ -35,12 +36,14 @@ return new class extends Migration {
             ])->default('pending');
             $table->json('metadata')->nullable();
             $table->timestamps();
-
+    
             $table->index('uuid');
             $table->index(['type', 'status']);
             $table->index(['transactionable_type', 'transactionable_id']);
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); 
         });
     }
+    
 
     /**
      * Reverse the migrations.

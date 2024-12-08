@@ -22,14 +22,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // AdminSeeder::class,
-            // UserSeeder::class,
-            // CurrencySeeder::class,
-            // WalletSeeder::class,
-            // MerchantSeeder::class,
-            // PaymentSystemSeeder::class,
-            // PaymentSeeder::class,
-            // WithdrawalSeeder::class,
+            AdminSeeder::class,
+            UserSeeder::class,
+            CurrencySeeder::class,
+            WalletSeeder::class,
+            MerchantSeeder::class,
+            PaymentSystemSeeder::class,
+            PaymentSeeder::class,
+            WithdrawalSeeder::class,
             TransactionSeeder::class,
             ExchangeRateSeeder::class,
         ]);

@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Account\MainController;
-use App\Http\Controllers\Account\OrderController;
 use App\Http\Controllers\Account\DepositController;
 use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Account\TransferController;
 use App\Http\Controllers\Account\MerchantController;
 use App\Http\Controllers\Account\WithdrawalController;
 use App\Http\Controllers\Account\TransactionController;
@@ -88,6 +88,17 @@ Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('{id}/transaction', [TransactionController::class, 'show'])
         ->name('transaction.show');
 
-    Route::get('orders', [OrderController::class, 'index'])
-        ->name('user.orders');
+    Route::prefix('transfer')->group(function () {
+        Route::get('', [TransferController::class, 'index'])
+            ->name('transfer');
+
+        Route::post('check', [TransferController::class, 'check'])
+            ->name('transfer.check');
+
+        Route::post('', [TransferController::class, 'store'])
+            ->name('transfer.store');
+
+        Route::get('success/{transaction}', [TransferController::class, 'success'])
+            ->name('transfer.success');
+    });
 });

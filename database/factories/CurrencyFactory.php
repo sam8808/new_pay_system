@@ -18,6 +18,15 @@ class CurrencyFactory extends Factory
         $currencies = [
             [
                 'type' => 'fiat',
+                'title' => 'Russain Ruble',
+                'code' => 'RUB',
+                'symbol' => '₽',
+                'exchange_rate' => 0.9,
+                'min_amount' => 1,
+                'max_amount' => 100000,
+            ],
+            [
+                'type' => 'fiat',
                 'title' => 'United States Dollar',
                 'code' => 'USD',
                 'symbol' => '$',

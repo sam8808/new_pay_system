@@ -36,10 +36,15 @@ const navigationItems = [
         name: "Мерчант",
         route: "merchant",
         icon: Building,
-    }, 
-       {
+    },
+    {
         name: "Пополнение",
         route: "deposit",
+        icon: Building,
+    },
+    {
+        name: "Перевод",
+        route: "transfer",
         icon: Building,
     },
     {
@@ -431,31 +436,4 @@ onUnmounted(() => {
 }
 </style>
 
-<style>
-:root {
-    --violet-50: #f5f3ff;
-    --violet-100: #ede9fe;
-    --violet-500: #8b5cf6;
-    --violet-600: #7c3aed;
-    --violet-700: #6d28d9;
-}
 
-/* Стили для скроллбара */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #e5e7eb;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #d1d5db;
-}
-</style>
