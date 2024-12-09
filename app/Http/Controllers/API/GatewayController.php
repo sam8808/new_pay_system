@@ -8,7 +8,22 @@ use Illuminate\Support\Facades\Log;
 
 class GatewayController extends Controller
 {
+    const GATEWAY_DEFAULT = 0;
+
     public function processPayment($request)
+    {
+        switch ($request['gateway_id']) {
+            case self::GATEWAY_DEFAULT:
+                return $this->getPaymentLink($request);
+                break;
+            
+            default:
+                // code...
+                break;
+        }
+    }
+
+    public function getPaymentLink($request)
     {
         // Отправка запроса к внешней системе
         // доработать потом с конкретной платежной системе, лог декабрь 9

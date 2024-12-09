@@ -17,6 +17,7 @@ class GatewayPaymentController extends Controller
             'order_id' => 'required|string|unique:payments,order_id',
             'description' => 'required|string',
             'client_data' => 'required|array',
+            'gateway_id' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -36,9 +37,13 @@ class GatewayPaymentController extends Controller
         ]);
 
         // Передать запрос шлюзу
+        //создал базовый шлюз, на основе которого потом будут созданы 
+        //отдельные шлюзы для платежных систем
+        //планируется использовать патерн стратегию для общего интерфейса 
         $gateway = new GatewayController();
 
         $response = $gateway->processPayment([
+            'gateway_id' => $validated['gateway_id'],
             'payment_id' => $payment->id,
             'amount' => $payment->amount,
             'currency' => $payment->currency,
