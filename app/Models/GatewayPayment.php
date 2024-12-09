@@ -11,6 +11,13 @@ class GatewayPayment extends Model
 
     protected $table = 'gateway_payment'; 
 
+    // created, processing, completed, failed, refunded
+    const STATUS_CREATED = 0;
+    const STATUS_PROCESSING = 1;
+    const STATUS_COMPLETED = 2;
+    const STATUS_FAILED = 3;
+    const STATUS_REFUNDED = 4;
+
     public function webhookNotifications()
     {
         return $this->hasMany(WebhookNotification::class);
