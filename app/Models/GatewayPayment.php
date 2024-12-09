@@ -9,6 +9,8 @@ class GatewayPayment extends Model
 {
     use HasFactory;
 
+    protected $table = 'gateway_payment'; 
+
     public function webhookNotifications()
     {
         return $this->hasMany(WebhookNotification::class);
