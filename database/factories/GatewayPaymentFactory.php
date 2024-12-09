@@ -23,7 +23,7 @@ class GatewayPaymentFactory extends Factory
             'order_id' => $this->faker->unique()->uuid, // Unique identifier for the order
             'amount' => $this->faker->randomFloat(2, 10, 1000), // Random amount between 10 and 1000 with 2 decimal places
             'currency' => $this->faker->currencyCode, // Random currency code (e.g., USD, EUR)
-            'status' => $this->faker->randomElement(['created', 'processing', 'completed', 'failed', 'refunded']), // Random status
+            'status' => $this->faker->numberBetween(0, 4), // Random status
             'payment_system_id' => $this->faker->optional()->randomNumber(5, true), // Optional random 5-digit number
             'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'), // Random datetime in the last year
             'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now'), // Random datetime in the last year

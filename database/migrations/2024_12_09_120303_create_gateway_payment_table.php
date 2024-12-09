@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('order_id')->unique();
             $table->decimal('amount', 10, 2);
             $table->string('currency', 10);
-            $table->string('status')->default('created'); // created, processing, completed, failed, refunded
+            $table->integer('status')->default(0); // created, processing, completed, failed, refunded
             $table->unsignedBigInteger('payment_system_id')->nullable();
             $table->timestamps();
             $table->timestamp('completed_at')->nullable();
