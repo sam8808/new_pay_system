@@ -13,6 +13,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payment extends Model
 {
     use HasFactory;
+
+    const STATUS_PENDING_STRING = 'pending';
+    const STATUS_PROCESSING_STRING = 'processing';
+    const STATUS_COMPLETED_STRING = 'completed';
+    const STATUS_FAILED_STRING = 'failed';
+    const STATUS_CANCELED_STRING = 'canceled';
+    const STATUS_REFUNDED_STRING = 'refunded';
+    
     protected $fillable = [
         'uuid',
         'merchant_id',
@@ -49,8 +57,9 @@ class Payment extends Model
 
     public function merchant()
     {
-        return $this->belongsTo(Merchant::class);
+        return $this->belongsTo(Merchant::class, 'merchant_id', 'id');
     }
+
 
     public function transaction()
     {

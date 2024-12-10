@@ -14,6 +14,8 @@ use Database\Seeders\WithdrawalSeeder;
 use Database\Seeders\TransactionSeeder;
 use Database\Seeders\ExchangeRateSeeder;
 use Database\Seeders\PaymentSystemSeeder;
+use Database\Seeders\GatewayPaymentSeeder;
+use Database\Seeders\WebhookNotificationSeeder;
 
 
 
@@ -32,6 +34,8 @@ class DatabaseSeeder extends Seeder
             WithdrawalSeeder::class,
             TransactionSeeder::class,
             ExchangeRateSeeder::class,
+            GatewayPaymentSeeder::class,
+            WebhookNotificationSeeder::class,
         ]);
     }
 }

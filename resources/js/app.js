@@ -7,6 +7,7 @@ import { Link, createInertiaApp, Head } from "@inertiajs/vue3";
 import vClickOutside from "v-click-outside";
 import AccountLayout from "./Layouts/AccountLayout.vue";
 import AdminLayout from "./Layouts/AdminLayout.vue";
+import '@fortawesome/fontawesome-free/css/all.css';
 
 createInertiaApp({
     resolve: (name) => {
