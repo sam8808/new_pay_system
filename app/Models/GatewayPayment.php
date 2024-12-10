@@ -11,6 +11,15 @@ class GatewayPayment extends Model
 
     protected $table = 'gateway_payment'; 
 
+    // Fillable fields
+    protected $fillable = [
+        'merchant_id',
+        'order_id',
+        'amount',
+        'currency',
+        'status',
+    ];
+
     // created, processing, completed, failed, refunded
     const STATUS_CREATED = 0;
     const STATUS_PROCESSING = 1;

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class GatewayController extends Controller
 {
-    const GATEWAY_DEFAULT = 0;
+    const GATEWAY_DEFAULT = 1;
 
     public function processPayment($request)
     {
@@ -23,18 +23,29 @@ class GatewayController extends Controller
         }
     }
 
-    public function getPaymentLink($request)
+    public function getPaymentLink(array $request)
     {
-        // Отправка запроса к внешней системе
-        // доработать потом с конкретной платежной системе, лог декабрь 9
-        $response = Http::post(env('EXTERNAL_PAYMENT_SYSTEM_URL'), [
-            'payment_id' => $payment->id,
-            'amount' => $validated['amount'],
-            'currency' => $validated['currency'],
+        // Simulate the request to an external payment system
+        // In a real scenario, you would send a request to the payment system and process the response
+        // Example:
+        // $response = Http::post(env('EXTERNAL_PAYMENT_SYSTEM_URL'), [
+        //     'payment_id' => $payment->id,
+        //     'amount' => $validated['amount'],
+        //     'currency' => $validated['currency'],
+        // ]);
+        
+        // Simulating a mock response
+        $order_id = $request['order_id'];
+        $response = collect([
+            'payment_link' => "/test-payment?order_id=$order_id",
+            'order_id' => $order_id,
+            'payment_id' => $request['payment_id']
         ]);
 
-        Log::info('GatewayController@processPayment', $response);
+        // Log the simulated response (in reality, you would log the actual response from the external system)
+        //Log::info('GatewayController@processPayment', $response);
 
-        return response()->json(['payment_link' => $response->json('payment_link')]);
+        // Return the payment link in a JSON response
+        return response()->json($response);
     }
 }

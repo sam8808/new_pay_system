@@ -3,21 +3,25 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\GatewayPayment;
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 
 class GatewayPaymentController extends Controller
 {
     public function createPay(Request $request)
     {
+
         $validator = \Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'required|string|max:10',
-            'order_id' => 'required|string|unique:payments,order_id',
             'description' => 'required|string',
             'client_data' => 'required|array',
             'gateway_id' => 'required|numeric',
+            'merchant_id' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -28,12 +32,26 @@ class GatewayPaymentController extends Controller
             ], 422);  // 422 is Unprocessable Entity
         }
 
-        $payment = GatewayPayment::create([
-            'merchant_id' => auth()->id(), 
-            'order_id' => $validated['order_id'],
-            'amount' => $validated['amount'],
-            'currency' => $validated['currency'],
-            'status' => GatewayPayment::STATUS_CREATED,
+        // Access validated data
+        $data = $validator->validated();
+        $uuid = Str::uuid();
+
+        $payment = Payment::create([
+            'uuid' => $uuid,
+            'merchant_id' => $data['merchant_id'],
+            'payment_system_id' => $data['gateway_id'] ?? 1,
+            'currency_id' => 2, //usd
+            'order_id' => $uuid, // ID заказа в системе мерчанта
+            'amount' => $data['amount'],
+            'processing_fee' => 1,
+            'amount_in_base_currency' => $data['amount'] * 1.1,
+            'status' => Payment::STATUS_PENDING_STRING,
+            'external_id' =>  $uuid,
+            'payer_email' => 'istore@mail.ru',
+            'payer_phone' => '+78888884545',
+            'metadata' => '',
+            'expires_at' => time(),
+            'processed_at' => time()
         ]);
 
         // Передать запрос шлюзу
@@ -43,15 +61,17 @@ class GatewayPaymentController extends Controller
         $gateway = new GatewayController();
 
         $response = $gateway->processPayment([
-            'gateway_id' => $validated['gateway_id'],
+            'gateway_id' => $data['gateway_id'],
             'payment_id' => $payment->id,
+            'order_id' => $payment->order_id,
             'amount' => $payment->amount,
-            'currency' => $payment->currency,
+            'currency' => $payment->currency_id,
         ]);
+        
+        //Log::info('GatewayPaymentController@createPay', $response);
 
-        Log::info('GatewayPaymentController@createPay', $response);
+        return  Response::json($response, 200);
 
-        return response()->json($response->json());
     }
 
     public function getPayment(Request $request, $id)
@@ -89,7 +109,7 @@ class GatewayPaymentController extends Controller
             ]);
 
             // Return a general error response
-            return response()->json([
+            return  Response::json([
                 'success' => false,
                 'message' => 'An error occurred while retrieving the payment',
             ], 500);

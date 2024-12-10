@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\TestMerchantController;
+use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\Auth\RegisterController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -53,6 +55,17 @@ Route::middleware('guest')->group(function () {
 
     //     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
+    Route::get('test/merchant/webhook', [TestMerchantController::class, 'webhook'])
+        ->name('test.merchant');
 });
 Route::post('logout', [LoginController::class, 'logout'])
     ->name('logout');
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('test/merchant', [TestMerchantController::class, 'index'])
+        ->name('test.merchant');
+
+    Route::get('test-payment', [TestPaymentController::class, 'index'])
+        ->name('test.payment');
+});
