@@ -102,15 +102,15 @@ const handlePayment = async (product) => {
 <template>
     <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 p-8 space-y-6 rounded-lg shadow-lg mx-auto">
 
-        <ul class="text-xl  flex justify-center gap-6 mb-6">
-            <Link :href="route('test.merchant')" class="group">
-               Shop
+        <ul class="text-xl flex justify-center gap-6 mb-6">
+            <Link :href="route('test.merchant', { merchant_id: props.merchant_id })" class="group">
+            Shop
             </Link>
-            <Link :href="route('merchant-coupon.create')" class="group">
-               Create coupon
+            <Link :href="route('merchant-coupon.create', { merchant_id: props.merchant_id })" class="group">
+            Create coupon
             </Link>
-            <Link :href="route('merchant-coupon.use')" class="group">
-               Use coupon
+            <Link :href="route('merchant-coupon.use', { merchant_id: props.merchant_id })" class="group">
+            Use coupon
             </Link>
         </ul>
 

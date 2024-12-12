@@ -162,9 +162,11 @@ class MerchantCouponsController extends Controller
 
 
     // Additional custom action
-    public function verify($id)
+    public function verify(Request $request)
     {
-        $coupon = MerchantCoupons::findOrFail($id);
+        return response()->json(['message' => 'Coupon verified successfully']);
+
+        $coupon = MerchantCoupons::findOrFail($request->code);
         // Logic for verification (for example)
         $coupon->status = MerchantCoupons::STATUS_VERIFIED_STRING;
         $coupon->save();

@@ -71,5 +71,6 @@ Route::middleware('auth')->group(function () {
         ->name('test.payment');
 
     Route::get('merchant-coupon/use', [MerchantCouponsController::class, 'use'])->name('merchant-coupon.use');
+    Route::post('merchant-coupon/verify', [MerchantCouponsController::class, 'verify'])->name('merchant-coupon.verify');
     Route::resource('merchant-coupon', MerchantCouponsController::class);
 });

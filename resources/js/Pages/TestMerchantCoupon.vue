@@ -1,18 +1,13 @@
 <script setup>
 import { ref } from 'vue';
+import { router, usePage } from "@inertiajs/vue3";
 
-const props = defineProps({
-    merchant_id: {
-        type: String,
-        required: true,
-    },
-    homePageRoute: String,
-    createCouponPageRoute: String,
-    useCouponPageRoute: String
-});
-console.log(props.createCouponPageRoute)
+const { props } = usePage()
+
 // Define couponAmount as a reactive reference
 const couponAmount = ref(10); // Default value can be 10 or any other number
+const showModal = ref(false); // Modal visibility control
+const modalMessage = ref(''); // Store the response message
 
 const createCoupon = async () => {
     console.log('Coupon Amount:', couponAmount.value); // Access the value using .value
@@ -27,7 +22,7 @@ const createCoupon = async () => {
             },
             body: JSON.stringify({
                 merchant_id: props.merchant_id,
-                amount: 100,
+                amount: couponAmount.value, // Using the dynamic amount
                 currency: 'USD',
                 description: 'Payment from test merchant',
                 gateway_id: 1
@@ -40,11 +35,26 @@ const createCoupon = async () => {
 
         const result = await response.json();
         console.log(result);
+
+        // Format response for user-friendly display
+        modalMessage.value = `
+            Coupon Created Successfully!
+
+            Coupon Amount: $${result.data.amount}
+            Coupon Code: ${result.data.code}
+
+            Terms of Use: ${result.data.terms_of_use}
+
+            Expires At: ${new Date(result.data.expires_at).toLocaleString()}
+        `;
+
+        showModal.value = true; // Show the modal
     } catch (error) {
         console.error(error);
+        modalMessage.value = "There was an error creating the coupon."; // Error message
+        showModal.value = true; // Show the modal
     }
 };
-
 </script>
 
 <template>
@@ -55,14 +65,14 @@ const createCoupon = async () => {
                 alt="Coupon Image" class="rounded-full shadow-md mb-4" />
         </div>
 
-        <ul class="text-xl  flex justify-center gap-6 mb-6">
-            <Link :href="route('test.merchant')" class="group">
+        <ul class="text-xl flex justify-center gap-6 mb-6">
+            <Link :href="route('test.merchant', { merchant_id: props.merchant_id })" class="group">
             Shop
             </Link>
-            <Link :href="route('merchant-coupon.create')" class="group">
+            <Link :href="route('merchant-coupon.create', { merchant_id: props.merchant_id })" class="group">
             Create coupon
             </Link>
-            <Link :href="route('merchant-coupon.use')" class="group">
+            <Link :href="route('merchant-coupon.use', { merchant_id: props.merchant_id })" class="group">
             Use coupon
             </Link>
         </ul>
@@ -97,6 +107,15 @@ const createCoupon = async () => {
                         Coupon</button>
                 </div>
             </form>
+        </div>
+
+        <!-- Modal -->
+        <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white p-6 rounded-lg w-1/3 text-center">
+                <div class="text-left">{{ modalMessage }}</div> <!-- Display formatted message -->
+                <button @click="showModal = false"
+                    class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md">Close</button>
+            </div>
         </div>
     </div>
 </template>
