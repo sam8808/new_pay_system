@@ -11,12 +11,14 @@ class TestMerchantController extends Controller
     {
         return Inertia::render('TestMerchant', [
             'title' => 'Главная | ' . config('app.name'),
-            'merchant_id' => $request->merchant_id
+            'merchant_id' => $request->merchant_id,
+            'homePageRoute' => route('test.merchant', ['merchant_id' => $request->merchant_id]),
+            'createCouponPageRoute' => route('merchant-coupon.create', ['merchant_id' => $request->merchant_id])
         ]);
-    }    
+    }
 
     public function webhook(Request $request)
-    {   
-        return response()->json(['error' => 'Internal error'], 500);       
+    {
+        return response()->json(['error' => 'Internal error'], 500);
     }
 }

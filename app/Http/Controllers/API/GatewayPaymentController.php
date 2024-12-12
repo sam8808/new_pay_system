@@ -19,7 +19,6 @@ class GatewayPaymentController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'required|string|max:10',
             'description' => 'required|string',
-            'client_data' => 'required|array',
             'gateway_id' => 'required|numeric',
             'merchant_id' => 'required|numeric',
         ]);
@@ -55,9 +54,9 @@ class GatewayPaymentController extends Controller
         ]);
 
         // Передать запрос шлюзу
-        //создал базовый шлюз, на основе которого потом будут созданы 
+        //создал базовый шлюз, на основе которого потом будут созданы
         //отдельные шлюзы для платежных систем
-        //планируется использовать патерн стратегию для общего интерфейса 
+        //планируется использовать патерн стратегию для общего интерфейса
         $gateway = new GatewayController();
 
         $response = $gateway->processPayment([
@@ -67,7 +66,7 @@ class GatewayPaymentController extends Controller
             'amount' => $payment->amount,
             'currency' => $payment->currency_id,
         ]);
-        
+
         //Log::info('GatewayPaymentController@createPay', $response);
 
         return  Response::json($response, 200);
@@ -114,5 +113,5 @@ class GatewayPaymentController extends Controller
                 'message' => 'An error occurred while retrieving the payment',
             ], 500);
         }
-    }   
+    }
 }

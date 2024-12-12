@@ -53,9 +53,11 @@ const successMessage = ref("");
 
 const props = defineProps({
     merchant_id: {
-        type: Number,
+        type: String,
         required: true,
     },
+    homePageRoute: String,
+    createCouponPageRoute: String,
 });
 
 // Function to handle payment
@@ -76,10 +78,10 @@ const handlePayment = async (product) => {
                 amount: product.price,
                 currency: 'USD',
                 description: 'Payment from test merchant',
-                client_data : {
-                	secret : 'asd213dewg21231341rfs'
+                client_data: {
+                    secret: 'asd213dewg21231341rfs'
                 },
-                gateway_id : 1
+                gateway_id: 1
             }),
         });
 
@@ -89,7 +91,7 @@ const handlePayment = async (product) => {
 
         const result = await response.json();
         const paymentLink = result.original.payment_link;
-		window.open(paymentLink, '_blank');
+        window.open(paymentLink, '_blank');
 
         successMessage.value = ``;
     } catch (error) {
@@ -100,11 +102,15 @@ const handlePayment = async (product) => {
     }
 };
 
-
 </script>
 
 <template>
     <div class="p-6 space-y-6">
+        <ul class="text-2xl" style="display: flex; gap: 2%">
+            <li><a :href="props.homePageRoute">Shop</a></li>
+            <li><a :href="props.createCouponPageRoute">Create a coupon</a></li>
+        </ul>
+        <hr>
         <!-- Description Section -->
         <div class="text-center text-gray-100">
             <h1 class="text-2xl text-black font-bold mb-2">Explore Our Products </h1>
@@ -113,44 +119,36 @@ const handlePayment = async (product) => {
             </p>
         </div>
 
-       <!-- Product Cards -->
-		<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-		    <div
-		        v-for="(product, index) in products"
-		        :key="product.id"
-		        class="relative p-6 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-		    >
-		        <!-- Product Image -->
-		        <div class="w-full h-48 bg-gray-200 rounded-xl overflow-hidden relative">
-		            <img
-		                :src="product.image"
-		                :alt="product.title"
-		                class="w-full h-full object-cover transition-transform duration-300"
-		            />
-		        </div>
+        <!-- Product Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            <div v-for="(product, index) in products" :key="product.id"
+                class="relative p-6 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                <!-- Product Image -->
+                <div class="w-full h-48 bg-gray-200 rounded-xl overflow-hidden relative">
+                    <img :src="product.image" :alt="product.title"
+                        class="w-full h-full object-cover transition-transform duration-300" />
+                </div>
 
-		        <!-- Product Details -->
-		        <div class="mt-4 text-black">
-		            <h2 class="text-2xl font-semibold bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600">
-		                {{ product.title }}
-		            </h2>
-		            <p class="text-sm mt-2">
-		                {{ product.description }}
-		            </p>
-		        </div>
+                <!-- Product Details -->
+                <div class="mt-4 text-black">
+                    <h2 class="text-2xl font-semibold bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600">
+                        {{ product.title }}
+                    </h2>
+                    <p class="text-sm mt-2">
+                        {{ product.description }}
+                    </p>
+                </div>
 
-		        <!-- Price and Actions -->
-		        <div class="mt-4 flex flex-col items-center justify-between">
-		            <button
-		                @click="handlePayment(product)"
-		                class="w-full mt-4 text-center text-sm font-medium  bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl transition-all"
-		                :disabled="loading"
-		            >
-		                {{ loading ? "Processing..." : `Pay $${product.price}` }}
-		            </button>
-		        </div>
-		    </div>
-		</div>
+                <!-- Price and Actions -->
+                <div class="mt-4 flex flex-col items-center justify-between">
+                    <button @click="handlePayment(product)"
+                        class="w-full mt-4 text-center text-sm font-medium  bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl transition-all"
+                        :disabled="loading">
+                        {{ loading ? "Processing..." : `Pay $${product.price}` }}
+                    </button>
+                </div>
+            </div>
+        </div>
 
 
         <!-- Success Message -->

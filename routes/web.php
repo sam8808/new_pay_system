@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TestMerchantController;
 use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\MerchantCouponsController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -68,4 +69,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('test-payment', [TestPaymentController::class, 'index'])
         ->name('test.payment');
+
+    Route::resource('merchant-coupon', MerchantCouponsController::class);
 });
