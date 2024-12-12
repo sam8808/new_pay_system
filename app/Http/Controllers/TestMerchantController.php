@@ -13,10 +13,10 @@ class TestMerchantController extends Controller
             'title' => 'Главная | ' . config('app.name'),
             'merchant_id' => $request->merchant_id
         ]);
-    }    
+    }
 
     public function webhook(Request $request)
-    {   
-        return response()->json(['error' => 'Internal error'], 500);       
+    {
+        return response()->json(['error' => 'Internal error'], 500);
     }
 }
