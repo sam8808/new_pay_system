@@ -53,7 +53,7 @@ const products = [
 // State for feedback
 const loading = ref(false);
 const successMessage = ref("");
-
+const amount = ref(100);
 
 // Function to handle payment
 const handlePayment = async (product) => {
@@ -70,7 +70,7 @@ const handlePayment = async (product) => {
                 merchant_id: props.merchant_id,
                 productId: product.id,
                 productTitle: product.title,
-                amount: product.price,
+                amount: amount.value,
                 currency: 'USD',
                 description: 'Payment from test merchant',
                 client_data: {
@@ -145,10 +145,11 @@ const handlePayment = async (product) => {
 
                 <!-- Price and Actions -->
                 <div class="mt-4 flex flex-col items-center justify-between">
+                    <input type="text" v-model="amount" >
                     <button @click="handlePayment(product)"
                         class="w-full mt-4 text-center text-sm font-medium  bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl transition-all"
                         :disabled="loading">
-                        {{ loading ? "Processing..." : `Pay $${product.price}` }}
+                        {{ `Pay $${amount}` }}
                     </button>
                 </div>
             </div>
