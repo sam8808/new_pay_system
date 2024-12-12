@@ -15,9 +15,8 @@ use Database\Seeders\TransactionSeeder;
 use Database\Seeders\ExchangeRateSeeder;
 use Database\Seeders\PaymentSystemSeeder;
 use Database\Seeders\GatewayPaymentSeeder;
+use Database\Seeders\MerchantCouponsSeeder;
 use Database\Seeders\WebhookNotificationSeeder;
-
-
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,6 +34,7 @@ class DatabaseSeeder extends Seeder
             TransactionSeeder::class,
             ExchangeRateSeeder::class,
             GatewayPaymentSeeder::class,
+            MerchantCouponsSeeder::class,
             WebhookNotificationSeeder::class,
         ]);
     }
