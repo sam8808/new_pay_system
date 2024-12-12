@@ -160,29 +160,66 @@ class MerchantCouponsController extends Controller
         ]);
     }
 
+    // система проверяет:
 
-    // Additional custom action
+    // Валидность купона
+    // Срок действия
+    // Статус (не использован)
+    // Сумму
+
+    // После проверки помечает купон использованным
+    // Подтверждает платеж
+    // Зачисляет средства мерчанту
     public function verify(Request $request)
     {
-        return response()->json(['message' => 'Coupon verified successfully']);
+        // Find the coupon by code and ensure it is pending
+        $coupon = MerchantCoupons::where('code', $request->code)
+            ->where('status', MerchantCoupons::STATUS_PENDING_STRING)
+            ->first();
 
-        $coupon = MerchantCoupons::findOrFail($request->code);
-        // Logic for verification (for example)
-        $coupon->status = MerchantCoupons::STATUS_VERIFIED_STRING;
+        if (!$coupon) {
+            return response()->json(['message' => 'Coupon not found or already used'], 404);
+        }
+
+        // Check expiration date
+        if ($coupon->expires_at && $coupon->expires_at < now()) {
+            return response()->json(['message' => 'Coupon has expired'], 400);
+        }
+
+        // Check validity of amount
+        if ($coupon->amount <= 0) {
+            return response()->json(['message' => 'Invalid coupon amount'], 400);
+        }
+
+        // Mark coupon as used
+        $coupon->status = MerchantCoupons::STATUS_USED_STRING;
+        $coupon->used_at = now();
         $coupon->save();
 
-        return response()->json(['message' => 'Coupon verified successfully']);
+        // Confirm payment (example: marking payment as successful)
+        $coupon->payment->status = Payment::STATUS_COMPLETED_STRING;
+
+        return response()->json([
+            'message' => 'Coupon verified and payment confirmed',
+            'code' => $coupon->code,
+            'amount' => $coupon->amount
+        ], 200);
     }
 
-    // Another custom action
     public function expire($id)
     {
         $coupon = MerchantCoupons::findOrFail($id);
-        // Logic for expiration
+
+        // Ensure the coupon is not already used
+        if ($coupon->status === MerchantCoupons::STATUS_USED_STRING) {
+            return response()->json(['message' => 'Coupon already used and cannot be expired'], 400);
+        }
+
+        // Mark coupon as expired
         $coupon->status = MerchantCoupons::STATUS_EXPIRED_STRING;
-        $coupon->expires_at = now(); // Set expiration time
+        $coupon->expires_at = now();
         $coupon->save();
 
-        return response()->json(['message' => 'Coupon expired']);
+        return response()->json(['message' => 'Coupon expired successfully'], 200);
     }
 }

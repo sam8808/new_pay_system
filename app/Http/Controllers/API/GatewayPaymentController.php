@@ -14,7 +14,6 @@ class GatewayPaymentController extends Controller
 {
     public function createPay(Request $request)
     {
-
         $validator = \Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'required|string|max:10',
