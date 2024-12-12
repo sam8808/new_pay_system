@@ -62,7 +62,7 @@ class MerchantCouponsController extends Controller
         $data = $validator->validated();
 
         $uuid = Str::uuid();
-        $couponCode = substr(Str::uuid()->toString(), 0, 16);
+        $couponCode = substr(Str::uuid()->toString(), 0, 8);
 
         $payment = Payment::create([
             'uuid' => $uuid,
@@ -198,28 +198,12 @@ class MerchantCouponsController extends Controller
 
         // Confirm payment (example: marking payment as successful)
         $coupon->payment->status = Payment::STATUS_COMPLETED_STRING;
+        $coupon->payment->save();
 
         return response()->json([
             'message' => 'Coupon verified and payment confirmed',
             'code' => $coupon->code,
             'amount' => $coupon->amount
         ], 200);
-    }
-
-    public function expire($id)
-    {
-        $coupon = MerchantCoupons::findOrFail($id);
-
-        // Ensure the coupon is not already used
-        if ($coupon->status === MerchantCoupons::STATUS_USED_STRING) {
-            return response()->json(['message' => 'Coupon already used and cannot be expired'], 400);
-        }
-
-        // Mark coupon as expired
-        $coupon->status = MerchantCoupons::STATUS_EXPIRED_STRING;
-        $coupon->expires_at = now();
-        $coupon->save();
-
-        return response()->json(['message' => 'Coupon expired successfully'], 200);
     }
 }
