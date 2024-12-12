@@ -10,9 +10,9 @@ const props = defineProps({
     createCouponPageRoute: String,
     useCouponPageRoute: String
 });
-console.log(props.createCouponPageRoute)
+
 // Define couponAmount as a reactive reference
-const couponAmount = ref(10); // Default value can be 10 or any other number
+const couponCode = ref(''); // Default value can be 10 or any other number
 
 const createCoupon = async () => {
     console.log('Coupon Amount:', couponAmount.value); // Access the value using .value
@@ -49,8 +49,8 @@ const createCoupon = async () => {
 
 <template>
     <div
-        class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 p-8 space-y-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-        <div class="text-white flex justify-center items-center mb-6">
+        class="bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 p-6 space-y-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+        <div class="text-white flex justify-center items-center">
             <img src="https://previews.123rf.com/images/chanut/chanut1808/chanut180802000/107443790-two-sale-coupons-vector-illustration-in-line-color-design.jpg"
                 alt="Coupon Image" class="rounded-full shadow-md mb-4" />
         </div>
@@ -70,8 +70,8 @@ const createCoupon = async () => {
         <hr class="border-gray-300 mb-6">
 
         <div class="text-center text-white">
-            <h1 class="text-3xl font-semibold mb-4">Create Your Coupon</h1>
-            <p class="text-lg mb-6">Enter the coupon amount below to create a new coupon</p>
+            <h1 class="text-3xl font-semibold mb-4">Use Your Coupon Here!</h1>
+            <p class="text-lg mb-6">Enter your coupon code below to redeem your offer</p>
 
             <form>
                 <div class="space-y-12">
@@ -79,10 +79,10 @@ const createCoupon = async () => {
                         <div class="mt-10 flex flex-col items-center gap-y-6">
                             <!-- Label and Input -->
                             <div class="w-full max-w-md">
-                                <label for="coupon-amount"
-                                    class="block text-sm font-medium text-gray-900 text-center">Coupon Amount</label>
+                                <label for="coupon-code"
+                                    class="block text-sm font-medium text-gray-900 text-center">Coupon Code</label>
                                 <div class="mt-2">
-                                    <input type="number" name="coupon-amount" id="coupon-amount" v-model="couponAmount"
+                                    <input type="text" name="coupon-code" id="coupon-code" v-model="couponCode"
                                         autocomplete="off"
                                         class="block w-full rounded-md bg-white px-4 py-2 text-lg text-gray-900 outline-none shadow-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-500 placeholder:text-gray-400">
                                 </div>
@@ -116,9 +116,5 @@ img {
     height: auto;
     max-width: 150px;
     object-fit: cover;
-}
-
-.hover\:text-yellow-400:hover {
-    color: #fbbf24;
 }
 </style>

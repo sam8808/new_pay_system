@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from "vue";
+import { router, usePage } from "@inertiajs/vue3";
+
+const { props } = usePage()
 
 // Sample products
 const products = [
@@ -51,14 +54,6 @@ const products = [
 const loading = ref(false);
 const successMessage = ref("");
 
-const props = defineProps({
-    merchant_id: {
-        type: String,
-        required: true,
-    },
-    homePageRoute: String,
-    createCouponPageRoute: String,
-});
 
 // Function to handle payment
 const handlePayment = async (product) => {
@@ -105,18 +100,26 @@ const handlePayment = async (product) => {
 </script>
 
 <template>
-    <div class="p-6 space-y-6">
-        <ul class="text-2xl" style="display: flex; gap: 2%">
-            <li><a :href="props.homePageRoute">Shop</a></li>
-            <li><a :href="props.createCouponPageRoute">Create a coupon</a></li>
+    <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 p-8 space-y-6 rounded-lg shadow-lg mx-auto">
+
+        <ul class="text-xl  flex justify-center gap-6 mb-6">
+            <Link :href="route('test.merchant')" class="group">
+               Shop
+            </Link>
+            <Link :href="route('merchant-coupon.create')" class="group">
+               Create coupon
+            </Link>
+            <Link :href="route('merchant-coupon.use')" class="group">
+               Use coupon
+            </Link>
         </ul>
-        <hr>
+
+        <hr class="border-gray-300 mb-6">
+
         <!-- Description Section -->
-        <div class="text-center text-gray-100">
-            <h1 class="text-2xl text-black font-bold mb-2">Explore Our Products </h1>
-            <p class="text-sm text-black">
-                Select a product to learn more and proceed to checkout when you're ready.
-            </p>
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-semibold mb-4">Explore Our Products</h1>
+            <p class="text-lg">Select a product to learn more and proceed to checkout when you're ready.</p>
         </div>
 
         <!-- Product Cards -->
@@ -131,7 +134,8 @@ const handlePayment = async (product) => {
 
                 <!-- Product Details -->
                 <div class="mt-4 text-black">
-                    <h2 class="text-2xl font-semibold bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600">
+                    <h2
+                        class="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600">
                         {{ product.title }}
                     </h2>
                     <p class="text-sm mt-2">
@@ -150,9 +154,8 @@ const handlePayment = async (product) => {
             </div>
         </div>
 
-
         <!-- Success Message -->
-        <div v-if="successMessage" class="mt-4 text-center text-green-500">
+        <div v-if="successMessage" class="mt-4 text-center text-green-500 font-semibold">
             {{ successMessage }}
         </div>
     </div>
@@ -165,5 +168,37 @@ const handlePayment = async (product) => {
 
 .bg-gradient-to-r {
     background: linear-gradient(to right, #4ade80, #34d399);
+}
+
+.hover\:text-yellow-400:hover {
+    color: #fbbf24;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.bg-emerald-500 {
+    background-color: #34d399;
+}
+
+.bg-emerald-600 {
+    background-color: #10b981;
+}
+
+.hover\:bg-emerald-600:hover {
+    background-color: #10b981;
+}
+
+.text-transparent {
+    color: transparent;
+}
+
+.bg-clip-text {
+    background-clip: text;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
 }
 </style>

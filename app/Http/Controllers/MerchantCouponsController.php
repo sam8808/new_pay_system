@@ -29,8 +29,6 @@ class MerchantCouponsController extends Controller
         return Inertia::render('TestMerchantCoupon', [
             'title' => 'Главная | ' . config('app.name'),
             'merchant_id' => $request->merchant_id,
-            'homePageRoute' => route('test.merchant', ['merchant_id' => $request->merchant_id]),
-            'createCouponPageRoute' => route('merchant-coupon.create', ['merchant_id' => $request->merchant_id])
         ]);
     }
 
@@ -138,7 +136,7 @@ class MerchantCouponsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMerchantCouponsRequest $request, MerchantCoupons $merchantCoupons)
+    public function update(Request $request, MerchantCoupons $merchantCoupons)
     {
         //
     }
@@ -149,5 +147,40 @@ class MerchantCouponsController extends Controller
     public function destroy(MerchantCoupons $merchantCoupons)
     {
         //
+    }
+
+    /**
+     * Coupon use page
+     */
+    public function use(Request $request)
+    {
+        return Inertia::render('TestMerchantCouponUse', [
+            'title' => 'Главная | ' . config('app.name'),
+            'merchant_id' => $request->query('merchant_id'),
+        ]);
+    }
+
+
+    // Additional custom action
+    public function verify($id)
+    {
+        $coupon = MerchantCoupons::findOrFail($id);
+        // Logic for verification (for example)
+        $coupon->status = MerchantCoupons::STATUS_VERIFIED_STRING;
+        $coupon->save();
+
+        return response()->json(['message' => 'Coupon verified successfully']);
+    }
+
+    // Another custom action
+    public function expire($id)
+    {
+        $coupon = MerchantCoupons::findOrFail($id);
+        // Logic for expiration
+        $coupon->status = MerchantCoupons::STATUS_EXPIRED_STRING;
+        $coupon->expires_at = now(); // Set expiration time
+        $coupon->save();
+
+        return response()->json(['message' => 'Coupon expired']);
     }
 }

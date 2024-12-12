@@ -70,5 +70,6 @@ Route::middleware('auth')->group(function () {
     Route::get('test-payment', [TestPaymentController::class, 'index'])
         ->name('test.payment');
 
+    Route::get('merchant-coupon/use', [MerchantCouponsController::class, 'use'])->name('merchant-coupon.use');
     Route::resource('merchant-coupon', MerchantCouponsController::class);
 });
