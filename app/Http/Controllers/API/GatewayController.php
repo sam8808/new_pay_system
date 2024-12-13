@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 class GatewayController extends Controller
 {
     const GATEWAY_DEFAULT = 1;
+    const GATEWAY_TINKOFF = 2;
 
     public function processPayment($request)
     {
@@ -16,7 +17,10 @@ class GatewayController extends Controller
             case self::GATEWAY_DEFAULT:
                 return $this->getPaymentLink($request);
                 break;
-            
+            case self::GATEWAY_TINKOFF:
+                return (new TinkoffGatewayController())->getPaymentLink($request);
+                break;
+
             default:
                 // code...
                 break;
@@ -33,7 +37,7 @@ class GatewayController extends Controller
         //     'amount' => $validated['amount'],
         //     'currency' => $validated['currency'],
         // ]);
-        
+
         // Simulating a mock response
         $order_id = $request['order_id'];
         $response = collect([

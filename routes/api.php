@@ -6,14 +6,13 @@ use App\Http\Controllers\API\ApiController;
 use App\Http\Controllers\API\GatewayPaymentController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Controllers\API\GatewayController;
+use App\Http\Controllers\API\TinkoffGatewayController;
 
 // Статус платежа
 // Route::get('payments/{payment}/status', [ApiController::class, 'status'])
 //     ->name('api.payment.status');
-
-
 /**
- * 
+ *
  * ## 5. Процесс обработки платежа
 
     1. Пользователь инициирует платёж на сайте мерчанта
@@ -28,12 +27,17 @@ use App\Http\Controllers\API\GatewayController;
  * */
 Route::prefix('payments')->group(function () {
     // 2-5 create a payment
-    Route::post('/create', [GatewayPaymentController::class, 'createPay'])->name('payments.create'); 
+    Route::post('/create', [GatewayPaymentController::class, 'createPay'])->name('payments.create');
 
     // get payment by ID
     Route::get('/{id}', [GatewayPaymentController::class, 'getPayment'])->name('payments.show');
+
+    Route::post('/tinkoff/webhook', [TinkoffGatewayController::class, 'webhook'])->name('tinkoff.webhook');
+    Route::get('/tinkoff/success', [TinkoffGatewayController::class, 'success'])->name('tinkoff.success');
+    Route::get('/tinkoff/fail', [TinkoffGatewayController::class, 'fail'])->name('tinkoff.fail');
 });
 
+
 // handle payment system webhook
-Route::post('/webhook/payment-system', [WebhookController::class, 'handle'])->name('webhooks.paymentSystem'); 
+Route::post('/webhook/payment-system', [WebhookController::class, 'handle'])->name('webhooks.paymentSystem');
 

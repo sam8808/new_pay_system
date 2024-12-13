@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { router, usePage } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const { props } = usePage()
 
@@ -67,15 +67,12 @@ const handlePayment = async (product) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                merchant_id: props.merchant_id,
+                merchant_id: props.merchant_id ?? 23,
                 productId: product.id,
                 productTitle: product.title,
-                amount: amount.value,
-                currency: 'USD',
+                amount: product.price,
+                currency: 2,
                 description: 'Payment from test merchant',
-                client_data: {
-                    secret: 'asd213dewg21231341rfs'
-                },
                 gateway_id: 1
             }),
         });
