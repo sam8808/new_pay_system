@@ -16,7 +16,7 @@ class GatewayPaymentController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
-            'currency' => 'required|string|max:10',
+            'currency' => 'required|numeric',
             'description' => 'required|string',
             'gateway_id' => 'required|numeric',
             'merchant_id' => 'required|numeric',
@@ -38,7 +38,7 @@ class GatewayPaymentController extends Controller
             'uuid' => $uuid,
             'merchant_id' => $data['merchant_id'],
             'payment_system_id' => $data['gateway_id'] ?? 1,
-            'currency_id' => 2, //usd
+            'currency_id' => $data['currency_id'] ?? 2, //usd
             'order_id' => $uuid, // ID заказа в системе мерчанта
             'amount' => $data['amount'],
             'processing_fee' => 1,
@@ -64,6 +64,7 @@ class GatewayPaymentController extends Controller
             'order_id' => $payment->order_id,
             'amount' => $payment->amount,
             'currency' => $payment->currency_id,
+            'description'=> $data['description']
         ]);
 
         //Log::info('GatewayPaymentController@createPay', $response);
