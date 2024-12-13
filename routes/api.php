@@ -7,6 +7,7 @@ use App\Http\Controllers\API\GatewayPaymentController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Controllers\API\GatewayController;
 use App\Http\Controllers\API\TinkoffGatewayController;
+use App\Http\Controllers\API\SberGatewayController;
 
 // Статус платежа
 // Route::get('payments/{payment}/status', [ApiController::class, 'status'])
@@ -35,6 +36,10 @@ Route::prefix('payments')->group(function () {
     Route::post('/tinkoff/webhook', [TinkoffGatewayController::class, 'webhook'])->name('tinkoff.webhook');
     Route::get('/tinkoff/success', [TinkoffGatewayController::class, 'success'])->name('tinkoff.success');
     Route::get('/tinkoff/fail', [TinkoffGatewayController::class, 'fail'])->name('tinkoff.fail');
+
+    Route::post('sber/webhook', [SberGatewayController::class, 'webhook'])->name('sber.webhook');
+    Route::get('sber/success', [SberGatewayController::class, 'success'])->name('sber.success');
+    Route::get('sber/fail', [SberGatewayController::class, 'fail'])->name('sber.fail');
 });
 
 
