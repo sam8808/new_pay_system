@@ -31,7 +31,6 @@ const useCoupon = async () => {
         }
 
         const result = await response.json();
-        console.log(result);
 
         // Format response for user-friendly display
         modalMessage.value = `
