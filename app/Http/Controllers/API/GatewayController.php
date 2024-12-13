@@ -10,6 +10,7 @@ class GatewayController extends Controller
 {
     const GATEWAY_DEFAULT = 1;
     const GATEWAY_TINKOFF = 2;
+    const GATEWAY_SBER = 3;
 
     public function processPayment($request)
     {
@@ -19,6 +20,9 @@ class GatewayController extends Controller
                 break;
             case self::GATEWAY_TINKOFF:
                 return (new TinkoffGatewayController())->getPaymentLink($request);
+                break;
+            case self::GATEWAY_SBER:
+                return (new SberGatewayController())->getPaymentLink($request);
                 break;
 
             default:

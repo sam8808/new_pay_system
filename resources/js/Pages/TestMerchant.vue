@@ -73,7 +73,7 @@ const handlePayment = async (product) => {
                 amount: product.price,
                 currency: 2,
                 description: 'Payment from test merchant',
-                gateway_id: 1
+                gateway_id: 3
             }),
         });
 
