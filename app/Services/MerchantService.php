@@ -20,10 +20,10 @@ class MerchantService
     private const VALIDATION_RULES = [
         'title' => ['required', 'string', 'max:255'],
         'domain' => ['nullable', 'string', 'url'],
-        'webhook_url' => ['required', 'string', 'unique:merchants,webhook_url', 'url:https'],
+        'webhook_url' => ['required', 'string', 'unique:merchants,webhook_url'], // 'url:https'
         'allowed_ips' => ['nullable', 'json'],
     ];
-    
+
 
 
     private array $validatedData = [];
@@ -60,7 +60,7 @@ class MerchantService
                 'allowed_ips' => $this->validatedData['allowed_ips'] ?? null,
                 'is_active' => true,
             ]);
-            
+
         } catch (Exception $e) {
             Log::error('Failed to create merchant', [
                 'error' => $e->getMessage(),

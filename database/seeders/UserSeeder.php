@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             'account' => 'F'.rand(12345678, 87654321),
         ]);
 
-        User::factory(10)->create();
+        // User::factory(10)->create();
     }
 }
 

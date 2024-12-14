@@ -47,7 +47,7 @@ class StatisticService
      */
     public function getApprovedPaymentsSum(): mixed
     {
-        return Payment::where('status', Payment::STATUS_SUCCESS)->sum('amount_default_currency');
+        return Payment::where('status', Payment::STATUS_COMPLETED_STRING)->sum('amount_default_currency');
     }
 
     /**
@@ -55,7 +55,7 @@ class StatisticService
      */
     public function getApprovedPaymentsSumToday(): mixed
     {
-        return Payment::where('status', Payment::STATUS_SUCCESS)->whereDate('created_at', Carbon::today())->sum('amount_default_currency');
+        return Payment::where('status', Payment::STATUS_COMPLETED_STRING)->whereDate('created_at', Carbon::today())->sum('amount_default_currency');
     }
 
     /**
@@ -63,7 +63,7 @@ class StatisticService
      */
     public function getApprovedPaymentsSumLast7Days(): mixed
     {
-        return Payment::where('status', Payment::STATUS_SUCCESS)
+        return Payment::where('status', Payment::STATUS_COMPLETED_STRING)
             ->whereBetween('created_at', [Carbon::today()->subDays(6), Carbon::today()])
             ->sum('amount_default_currency');
     }
@@ -73,7 +73,7 @@ class StatisticService
      */
     public function getApprovedPaymentsSumThisMonth(): mixed
     {
-        return Payment::where('status', Payment::STATUS_SUCCESS)
+        return Payment::where('status', Payment::STATUS_COMPLETED_STRING)
             ->whereMonth('created_at', Carbon::today()->month)
             ->sum('amount_default_currency');
     }

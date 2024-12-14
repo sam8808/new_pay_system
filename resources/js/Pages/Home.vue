@@ -263,24 +263,45 @@ onUnmounted(() => {
             <nav class="container mx-auto px-6 py-4">
                 <div class="flex items-center justify-between">
                     <Link :href="route('home')" class="group">
-                        <div class="flex items-center space-x-2">
-                            <svg
-                                class="w-8 h-8 text-blue-600 transform transition-transform group-hover:rotate-12"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                        <div class="flex items-center space-x-3 group">
+                            <!-- Иконка -->
+                            <div
+                                class="relative w-10 h-10 flex items-center justify-center"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                                />
-                            </svg>
-                            <span
-                                class="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"
-                                >PaySystem</span
-                            >
+                                <!-- Фоновый градиент -->
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-tr from-violet-500 to-blue-500 rounded-xl opacity-10 group-hover:opacity-20 transition-all duration-300"
+                                ></div>
+
+                                <!-- Иконка -->
+                                <svg
+                                    class="w-6 h-6 transform transition-all duration-300 relative z-10 text-violet-600 group-hover:scale-105"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                    />
+                                </svg>
+                            </div>
+
+                            <!-- Текст -->
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-xl font-bold text-gray-900 transition-colors duration-300 group-hover:text-violet-600"
+                                >
+                                    Finsystem
+                                </span>
+                                <span
+                                    class="text-xs font-semibold tracking-widest text-violet-600"
+                                >
+                                    DMG
+                                </span>
+                            </div>
                         </div>
                     </Link>
 
@@ -1104,5 +1125,8 @@ onUnmounted(() => {
     bottom: 40px;
     z-index: 999;
 
+}
+.group:hover svg path {
+    filter: drop-shadow(0 0 2px rgba(79, 70, 229, 0.2));
 }
 </style>

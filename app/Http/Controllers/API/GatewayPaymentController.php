@@ -14,12 +14,10 @@ class GatewayPaymentController extends Controller
 {
     public function createPay(Request $request)
     {
-
         $validator = \Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
-            'currency' => 'required|string|max:10',
+            'currency' => 'required|numeric',
             'description' => 'required|string',
-            'client_data' => 'required|array',
             'gateway_id' => 'required|numeric',
             'merchant_id' => 'required|numeric',
         ]);
@@ -40,7 +38,7 @@ class GatewayPaymentController extends Controller
             'uuid' => $uuid,
             'merchant_id' => $data['merchant_id'],
             'payment_system_id' => $data['gateway_id'] ?? 1,
-            'currency_id' => 2, //usd
+            'currency_id' => $data['currency_id'] ?? 2, //usd
             'order_id' => $uuid, // ID заказа в системе мерчанта
             'amount' => $data['amount'],
             'processing_fee' => 1,
@@ -55,9 +53,9 @@ class GatewayPaymentController extends Controller
         ]);
 
         // Передать запрос шлюзу
-        //создал базовый шлюз, на основе которого потом будут созданы 
+        //создал базовый шлюз, на основе которого потом будут созданы
         //отдельные шлюзы для платежных систем
-        //планируется использовать патерн стратегию для общего интерфейса 
+        //планируется использовать патерн стратегию для общего интерфейса
         $gateway = new GatewayController();
 
         $response = $gateway->processPayment([
@@ -66,8 +64,9 @@ class GatewayPaymentController extends Controller
             'order_id' => $payment->order_id,
             'amount' => $payment->amount,
             'currency' => $payment->currency_id,
+            'description'=> $data['description']
         ]);
-        
+
         //Log::info('GatewayPaymentController@createPay', $response);
 
         return  Response::json($response, 200);
@@ -114,5 +113,5 @@ class GatewayPaymentController extends Controller
                 'message' => 'An error occurred while retrieving the payment',
             ], 500);
         }
-    }   
+    }
 }

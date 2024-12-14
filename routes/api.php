@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ApiController;
+
 use App\Http\Controllers\API\GatewayPaymentController;
 use App\Http\Controllers\API\WebhookController;
-use App\Http\Controllers\Ticket\TicketController;
-use Illuminate\Support\Facades\Route;
-use \App\Http\Controllers\Ticket\MessageController;
+use App\Http\Controllers\API\GatewayController;
+
 // Статус платежа
 // Route::get('payments/{payment}/status', [ApiController::class, 'status'])
 //     ->name('api.payment.status');
@@ -31,6 +32,14 @@ Route::prefix('payments')->group(function () {
 
     // get payment by ID
     Route::get('/{id}', [GatewayPaymentController::class, 'getPayment'])->name('payments.show');
+
+    Route::post('/tinkoff/webhook', [TinkoffGatewayController::class, 'webhook'])->name('tinkoff.webhook');
+    Route::get('/tinkoff/success', [TinkoffGatewayController::class, 'success'])->name('tinkoff.success');
+    Route::get('/tinkoff/fail', [TinkoffGatewayController::class, 'fail'])->name('tinkoff.fail');
+
+    Route::post('sber/webhook', [SberGatewayController::class, 'webhook'])->name('sber.webhook');
+    Route::get('sber/success', [SberGatewayController::class, 'success'])->name('sber.success');
+    Route::get('sber/fail', [SberGatewayController::class, 'fail'])->name('sber.fail');
 });
 
 // handle payment system webhook

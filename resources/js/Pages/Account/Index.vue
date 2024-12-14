@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { ref } from "vue";
 import { Link } from "@inertiajs/vue3";
@@ -11,13 +10,10 @@ import {
     Activity,
     Clock,
     ChevronRight,
-    ShieldCheck,
-    Zap,
-    Building2,
-    CircleDollarSign,
     ArrowRightLeft,
+    CircleDollarSign,
     Calendar,
-    Users,
+    RefreshCcw, // Используем эту иконку вместо Exchange
 } from "lucide-vue-next";
 
 const props = defineProps({
@@ -49,17 +45,12 @@ const hasRoute = (name) => {
     }
 };
 
-// Определение типа валюты
-const isCrypto = (currency) => {
-    const cryptoCurrencies = ["BTC", "ETH", "USDT"];
-    return cryptoCurrencies.includes(currency);
-};
-
-// Форматирование суммы в зависимости от типа валюты
+// Форматирование суммы с учетом криптовалют
 const formatAmount = (amount, currency) => {
     const value = Number(amount);
 
-    if (isCrypto(currency)) {
+    // Для криптовалют используем больше знаков после запятой
+    if (currency && currency.is_crypto) {
         if (value < 0.0001) return value.toFixed(8);
         if (value < 0.01) return value.toFixed(6);
         if (value < 1) return value.toFixed(4);
@@ -72,20 +63,22 @@ const formatAmount = (amount, currency) => {
 // Форматирование валюты
 const formatCurrency = (amount, currency = "USD") => {
     const value = formatAmount(amount, currency);
+    const currencyCode =
+        typeof currency === "object" ? currency.code : currency;
 
-    if (isCrypto(currency)) {
-        return `${value} ${currency}`;
+    if (currency && currency.is_crypto) {
+        return `${value} ${currencyCode}`;
     }
 
     try {
         return new Intl.NumberFormat("ru-RU", {
             style: "currency",
-            currency: currency,
+            currency: currencyCode,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         }).format(amount);
     } catch {
-        return `${value} ${currency}`;
+        return `${value} ${currencyCode}`;
     }
 };
 
@@ -115,10 +108,6 @@ const getTransactionStatus = (status) => {
             class: "bg-red-50 text-red-700",
             text: "Ошибка",
         },
-        processing: {
-            class: "bg-blue-50 text-blue-700",
-            text: "Обработка",
-        },
         canceled: {
             class: "bg-gray-50 text-gray-700",
             text: "Отменено",
@@ -134,21 +123,43 @@ const getTransactionType = (type) => {
             icon: ArrowUpRight,
             class: "text-emerald-600 bg-emerald-50",
             prefix: "+",
+            text: "Пополнение",
         },
         withdrawal: {
             icon: ArrowDownRight,
             class: "text-red-600 bg-red-50",
             prefix: "-",
+            text: "Вывод",
         },
         transfer: {
             icon: ArrowRightLeft,
             class: "text-blue-600 bg-blue-50",
             prefix: "",
+            text: "Перевод",
         },
         exchange: {
-            icon: CircleDollarSign,
+            icon: RefreshCcw,
             class: "text-violet-600 bg-violet-50",
             prefix: "≈",
+            text: "Обмен",
+        },
+        fee: {
+            icon: CircleDollarSign,
+            class: "text-gray-600 bg-gray-50",
+            prefix: "-",
+            text: "Комиссия",
+        },
+        referral: {
+            icon: ArrowUpRight,
+            class: "text-amber-600 bg-amber-50",
+            prefix: "+",
+            text: "Реферальные",
+        },
+        refund: {
+            icon: ArrowDownRight,
+            class: "text-emerald-600 bg-emerald-50",
+            prefix: "+",
+            text: "Возврат",
         },
     };
     return typeMap[type] || typeMap.deposit;
@@ -173,7 +184,7 @@ const getTransactionType = (type) => {
                         <div
                             v-for="wallet in wallets"
                             :key="wallet.id"
-                            class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50"
+                            class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50 card-hover-effect"
                         >
                             <!-- Хедер кошелька -->
                             <div class="flex items-center justify-between mb-4">
@@ -193,12 +204,6 @@ const getTransactionType = (type) => {
                                     >
                                         {{ wallet.currency.code }}
                                     </span>
-                                    <div
-                                        v-if="wallet.is_default"
-                                        class="px-2 py-1 bg-violet-50 text-violet-600 rounded-lg text-xs font-medium"
-                                    >
-                                        По умолчанию
-                                    </div>
                                 </div>
                             </div>
 
@@ -208,30 +213,13 @@ const getTransactionType = (type) => {
                                     <p
                                         class="text-sm font-medium text-gray-500"
                                     >
-                                        Доступно
+                                        Баланс
                                     </p>
                                     <p class="text-2xl font-bold text-gray-900">
                                         {{
                                             formatCurrency(
                                                 wallet.balance,
-                                                wallet.currency.code
-                                            )
-                                        }}
-                                    </p>
-                                </div>
-                                <div v-if="wallet.reserved_balance > 0">
-                                    <p
-                                        class="text-sm font-medium text-gray-500"
-                                    >
-                                        Зарезервировано
-                                    </p>
-                                    <p
-                                        class="text-lg font-semibold text-gray-600"
-                                    >
-                                        {{
-                                            formatCurrency(
-                                                wallet.reserved_balance,
-                                                wallet.currency.code
+                                                wallet.currency
                                             )
                                         }}
                                     </p>
@@ -247,7 +235,7 @@ const getTransactionType = (type) => {
                 >
                     <!-- Количество магазинов -->
                     <div
-                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50"
+                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50 card-hover-effect"
                     >
                         <div class="flex items-center justify-between mb-4">
                             <div
@@ -261,7 +249,7 @@ const getTransactionType = (type) => {
                             >
                         </div>
                         <p class="text-sm font-medium text-gray-500">
-                            Активные мерчанты
+                            Мерчанты
                         </p>
                         <p class="text-2xl font-bold text-gray-900 mt-2">
                             {{ stats.merchantsCount }}
@@ -270,7 +258,7 @@ const getTransactionType = (type) => {
 
                     <!-- Поступления за сегодня -->
                     <div
-                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50"
+                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50 card-hover-effect"
                     >
                         <div class="flex items-center justify-between mb-4">
                             <div
@@ -297,7 +285,7 @@ const getTransactionType = (type) => {
 
                     <!-- Выводы за сегодня -->
                     <div
-                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50"
+                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50 card-hover-effect"
                     >
                         <div class="flex items-center justify-between mb-4">
                             <div
@@ -320,7 +308,7 @@ const getTransactionType = (type) => {
 
                     <!-- Объем за месяц -->
                     <div
-                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50"
+                        class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300 border border-gray-100/50 card-hover-effect"
                     >
                         <div class="flex items-center justify-between mb-4">
                             <div
@@ -349,7 +337,7 @@ const getTransactionType = (type) => {
                     <!-- Последние операции -->
                     <div class="lg:col-span-2">
                         <div
-                            class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden border border-gray-100/50"
+                            class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden border border-gray-100/50 card-hover-effect"
                         >
                             <!-- Заголовок -->
                             <div class="px-6 py-4 border-b border-gray-100">
@@ -372,7 +360,7 @@ const getTransactionType = (type) => {
                             <div class="divide-y divide-gray-100">
                                 <div
                                     v-for="transaction in recentTransactions"
-                                    :key="transaction.id"
+                                    :key="transaction.uuid"
                                     class="px-6 py-4 hover:bg-gray-50/50 transition-colors"
                                 >
                                     <div
@@ -404,16 +392,9 @@ const getTransactionType = (type) => {
                                                     class="text-sm font-semibold text-gray-900"
                                                 >
                                                     {{
-                                                        transaction.type ===
-                                                        "deposit"
-                                                            ? "Пополнение"
-                                                            : transaction.type ===
-                                                              "withdrawal"
-                                                            ? "Вывод"
-                                                            : transaction.type ===
-                                                              "transfer"
-                                                            ? "Перевод"
-                                                            : "Обмен"
+                                                        getTransactionType(
+                                                            transaction.type
+                                                        ).text
                                                     }}
                                                 </p>
                                                 <p
@@ -446,7 +427,6 @@ const getTransactionType = (type) => {
                                                     formatCurrency(
                                                         transaction.amount,
                                                         transaction.currency
-                                                            .code
                                                     )
                                                 }}
                                             </p>
@@ -464,6 +444,18 @@ const getTransactionType = (type) => {
                                                     ).text
                                                 }}
                                             </span>
+                                            <p
+                                                v-if="transaction.fee > 0"
+                                                class="text-xs text-gray-500"
+                                            >
+                                                Комиссия:
+                                                {{
+                                                    formatCurrency(
+                                                        transaction.fee,
+                                                        transaction.currency
+                                                    )
+                                                }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -493,7 +485,7 @@ const getTransactionType = (type) => {
                     <div class="space-y-6">
                         <!-- Быстрые действия -->
                         <div
-                            class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden border border-gray-100/50"
+                            class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden border border-gray-100/50 card-hover-effect"
                         >
                             <div class="px-6 py-4 border-b border-gray-100">
                                 <h2 class="text-xl font-bold text-gray-900">
@@ -523,7 +515,7 @@ const getTransactionType = (type) => {
 
                         <!-- Статистика за месяц -->
                         <div
-                            class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden border border-gray-100/50"
+                            class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden border border-gray-100/50 card-hover-effect"
                         >
                             <div class="px-6 py-4 border-b border-gray-100">
                                 <div class="flex items-center justify-between">
@@ -555,7 +547,9 @@ const getTransactionType = (type) => {
                                         <span
                                             class="text-sm font-bold text-gray-900"
                                             >{{
-                                                monthlyStats.successRate
+                                                monthlyStats.successRate.toFixed(
+                                                    1
+                                                )
                                             }}%</span
                                         >
                                     </div>
@@ -563,7 +557,7 @@ const getTransactionType = (type) => {
                                         class="h-2 bg-gray-100 rounded-full overflow-hidden"
                                     >
                                         <div
-                                            class="h-full bg-gradient-to-r from-violet-500 to-violet-600 rounded-full transition-all duration-300"
+                                            class="h-full bg-gradient-to-r from-violet-500 to-violet-600 rounded-full transition-all duration-300 progress-bar-animation"
                                             :style="{
                                                 width: `${monthlyStats.successRate}%`,
                                             }"
@@ -596,7 +590,7 @@ const getTransactionType = (type) => {
                                         class="h-2 bg-gray-100 rounded-full overflow-hidden"
                                     >
                                         <div
-                                            class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-300"
+                                            class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-300 progress-bar-animation"
                                             :style="{
                                                 width: `${
                                                     (monthlyStats.merchantsStats
@@ -611,14 +605,14 @@ const getTransactionType = (type) => {
                                     </div>
                                 </div>
 
-                                <!-- Средний чек -->
+                                <!-- Средний платёж -->
                                 <div class="pt-4 border-t border-gray-100">
                                     <div
                                         class="flex justify-between items-center"
                                     >
                                         <span
                                             class="text-sm font-medium text-gray-500"
-                                            >Средний чек</span
+                                            >Средний платёж</span
                                         >
                                         <span
                                             class="text-sm font-bold text-gray-900"
@@ -674,5 +668,35 @@ const getTransactionType = (type) => {
 
 .progress-bar-animation {
     transition: width 1s ease-in-out;
+}
+
+/* Тонкий скроллбар */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
+
+/* Улучшенные эффекты перехода */
+.transition-all {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Эффект размытия */
+.backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
 }
 </style>

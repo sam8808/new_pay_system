@@ -12,7 +12,6 @@ import {
     Eye,
 } from "lucide-vue-next";
 
-// Пропсы
 const props = defineProps({
     transactions: {
         type: Object,
@@ -20,7 +19,6 @@ const props = defineProps({
     },
 });
 
-// Состояния
 const searchQuery = ref("");
 const selectedStatus = ref("all");
 const selectedType = ref("all");
@@ -28,32 +26,44 @@ const sortDirection = ref("desc");
 const showDetails = ref(null);
 const selectedRows = ref(new Set());
 
-// Фильтрация операций
+// Статусы и типы транзакций
+const STATUSES = {
+    pending: "В обработке",
+    completed: "Подтверждено",
+    failed: "Неудача",
+    canceled: "Отменено",
+};
+
+const TYPES = {
+    deposit: "Пополнение",
+    withdrawal: "Вывод",
+    transfer: "Перевод",
+    exchange: "Обмен",
+    fee: "Комиссия",
+    referral: "Реферальные",
+    refund: "Возврат",
+};
+
 const filteredTransaction = computed(() => {
     return props.transactions.data.filter((transaction) => {
         const matchesSearch =
-            transaction.id.toString().includes(searchQuery.value) ||
+            transaction.uuid
+                .toLowerCase()
+                .includes(searchQuery.value.toLowerCase()) ||
             searchQuery.value === "";
 
         const matchesStatus =
-            selectedStatus.value === "all"
-                ? true
-                : selectedStatus.value === "confirmed"
-                ? transaction.confirmed
-                : selectedStatus.value === "canceled"
-                ? transaction.canceled
-                : true;
+            selectedStatus.value === "all" ||
+            transaction.status === selectedStatus.value;
 
         const matchesType =
-            selectedType.value === "all"
-                ? true
-                : transaction.type === selectedType.value;
+            selectedType.value === "all" ||
+            transaction.type === selectedType.value;
 
         return matchesSearch && matchesStatus && matchesType;
     });
 });
 
-// Форматирование даты
 const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("ru-RU", {
@@ -65,45 +75,51 @@ const formatDate = (dateString) => {
     }).format(date);
 };
 
-// Форматирование суммы
-const formatAmount = (amount) => {
-    return new Intl.NumberFormat("ru-RU", {
-        style: "currency",
-        currency: "RUB",
-        minimumFractionDigits: 2,
-    }).format(amount);
+const formatAmount = (amount, currency) => {
+    return (
+        new Intl.NumberFormat("ru-RU", {
+            style: "decimal",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 8,
+        }).format(amount) + ` ${currency}`
+    );
 };
 
-// Получение статуса операции
 const getTransactionStatus = (transaction) => {
-    if (transaction.confirmed) {
-        return {
-            icon: CheckCircle,
-            class: "bg-green-100 text-green-700",
-            text: "Подтверждено",
-        };
+    switch (transaction.status) {
+        case "completed":
+            return {
+                icon: CheckCircle,
+                class: "bg-green-100 text-green-700",
+                text: STATUSES[transaction.status],
+            };
+        case "failed":
+        case "canceled":
+            return {
+                icon: XCircle,
+                class: "bg-red-100 text-red-700",
+                text: STATUSES[transaction.status],
+            };
+        default:
+            return {
+                icon: AlertCircle,
+                class: "bg-yellow-100 text-yellow-700",
+                text: STATUSES[transaction.status],
+            };
     }
-    if (transaction.canceled) {
-        return {
-            icon: XCircle,
-            class: "bg-red-100 text-red-700",
-            text: "Отменено",
-        };
-    }
-    return {
-        icon: AlertCircle,
-        class: "bg-yellow-100 text-yellow-700",
-        text: "В обработке",
-    };
 };
 
-// Переключение выбора строки
-const toggleRowSelection = (id) => {
-    if (selectedRows.value.has(id)) {
-        selectedRows.value.delete(id);
-    } else {
-        selectedRows.value.add(id);
-    }
+const getTransactionTypeStyle = (type) => {
+    const styles = {
+        deposit: "bg-emerald-50 text-emerald-700",
+        withdrawal: "bg-red-50 text-red-700",
+        transfer: "bg-blue-50 text-blue-700",
+        exchange: "bg-purple-50 text-purple-700",
+        fee: "bg-gray-50 text-gray-700",
+        referral: "bg-amber-50 text-amber-700",
+        refund: "bg-pink-50 text-pink-700",
+    };
+    return styles[type] || "bg-gray-50 text-gray-700";
 };
 </script>
 
@@ -111,13 +127,19 @@ const toggleRowSelection = (id) => {
     <AccountLayout>
         <div class="container mx-auto px-8 py-8">
             <!-- Заголовок и действия -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"
+            >
                 <div class="flex items-center gap-4">
-                    <h1 class="text-2xl font-semibold text-gray-900">История операций</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900">
+                        История транзакций
+                    </h1>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button class="inline-flex items-center px-4 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 shadow-lg shadow-violet-600/20 transition-all duration-300">
+                    <button
+                        class="inline-flex items-center px-4 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 shadow-lg shadow-violet-600/20 transition-all duration-300"
+                    >
                         <Filter class="w-4 h-4 mr-2" />
                         Фильтры
                     </button>
@@ -125,103 +147,207 @@ const toggleRowSelection = (id) => {
             </div>
 
             <!-- Панель фильтров -->
-            <div class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 mb-6 backdrop-blur-xl">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+            <div
+                class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 mb-6 backdrop-blur-xl"
+            >
+                <div
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6"
+                >
                     <!-- Поиск -->
                     <div class="relative">
-                        <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input v-model="searchQuery"
-                               type="text"
-                               placeholder="Поиск по ID..."
-                               class="w-full pl-11 pr-4 py-3 text-sm bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 transition-shadow duration-300" />
+                        <Search
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                        />
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            placeholder="Поиск по UUID..."
+                            class="w-full pl-11 pr-4 py-3 text-sm bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 transition-shadow duration-300"
+                        />
                     </div>
 
-                    <!-- Фильтры -->
-                    <select v-model="selectedStatus"
-                            class="w-full px-4 py-3 text-sm bg-gray-50 border-0 rounded-xl appearance-none focus:ring-2 focus:ring-violet-500 transition-shadow duration-300">
+                    <!-- Фильтр статуса -->
+                    <select
+                        v-model="selectedStatus"
+                        class="w-full px-4 py-3 text-sm bg-gray-50 border-0 rounded-xl appearance-none focus:ring-2 focus:ring-violet-500 transition-shadow duration-300"
+                    >
                         <option value="all">Все статусы</option>
-                        <option value="confirmed">Подтверждено</option>
-                        <option value="canceled">Отменено</option>
-                        <option value="pending">В обработке</option>
+                        <option
+                            v-for="(label, status) in STATUSES"
+                            :key="status"
+                            :value="status"
+                        >
+                            {{ label }}
+                        </option>
                     </select>
 
-                    <select v-model="selectedType"
-                            class="w-full px-4 py-3 text-sm bg-gray-50 border-0 rounded-xl appearance-none focus:ring-2 focus:ring-violet-500 transition-shadow duration-300">
+                    <!-- Фильтр типа -->
+                    <select
+                        v-model="selectedType"
+                        class="w-full px-4 py-3 text-sm bg-gray-50 border-0 rounded-xl appearance-none focus:ring-2 focus:ring-violet-500 transition-shadow duration-300"
+                    >
                         <option value="all">Все типы</option>
-                        <option value="payIn">Пополнения</option>
-                        <option value="payOut">Выводы</option>
+                        <option
+                            v-for="(label, type) in TYPES"
+                            :key="type"
+                            :value="type"
+                        >
+                            {{ label }}
+                        </option>
                     </select>
 
-                    <button @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm text-gray-700 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300">
+                    <!-- Сортировка -->
+                    <button
+                        @click="
+                            sortDirection =
+                                sortDirection === 'asc' ? 'desc' : 'asc'
+                        "
+                        class="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm text-gray-700 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300"
+                    >
                         <ArrowUpDown class="w-4 h-4" />
-                        {{ sortDirection === "asc" ? "Сначала старые" : "Сначала новые" }}
+                        {{
+                            sortDirection === "asc"
+                                ? "Сначала старые"
+                                : "Сначала новые"
+                        }}
                     </button>
                 </div>
             </div>
 
             <!-- Таблица -->
-            <div class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden backdrop-blur-xl">
+            <div
+                class="bg-white rounded-2xl shadow-lg shadow-gray-100/50 overflow-hidden backdrop-blur-xl"
+            >
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
                             <tr>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">ID</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">Дата</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">Тип</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">Сумма</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">Валюта</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">Статус</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">Действия</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    UUID
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    Дата
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    Тип
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    Сумма
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    Комиссия
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    Статус
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80"
+                                >
+                                    Действия
+                                </th>
                             </tr>
                         </thead>
 
                         <tbody class="divide-y divide-gray-100">
-                            <tr v-for="transaction in filteredTransaction"
-                                :key="transaction.id"
-                                class="hover:bg-gray-50/50 transition-all duration-300">
+                            <tr
+                                v-for="transaction in filteredTransaction"
+                                :key="transaction.uuid"
+                                class="hover:bg-gray-50/50 transition-all duration-300"
+                            >
                                 <td class="px-6 py-4">
-                                    <span class="text-sm font-medium text-gray-900">#{{ transaction.id }}</span>
+                                    <span
+                                        class="text-sm font-medium text-gray-900"
+                                        >{{ transaction.uuid }}</span
+                                    >
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-600">{{ formatDate(transaction.created_at) }}</span>
+                                    <span class="text-sm text-gray-600">{{
+                                        formatDate(transaction.created_at)
+                                    }}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span :class="[
-                                        'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium',
-                                        transaction.type === 'payIn'
-                                            ? 'bg-emerald-50 text-emerald-700'
-                                            : 'bg-red-50 text-red-700',
-                                    ]">
-                                        {{ transaction.type === "payIn" ? "Пополнение" : "Вывод" }}
+                                    <span
+                                        :class="[
+                                            'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium',
+                                            getTransactionTypeStyle(
+                                                transaction.type
+                                            ),
+                                        ]"
+                                    >
+                                        {{ TYPES[transaction.type] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span :class="[
-                                        'text-sm font-semibold',
-                                        transaction.type === 'payIn'
-                                            ? 'text-emerald-600'
-                                            : 'text-red-600',
-                                    ]">
-                                        {{ formatAmount(transaction.amount) }}
+                                    <span
+                                        :class="[
+                                            'text-sm font-semibold',
+                                            transaction.type === 'deposit'
+                                                ? 'text-emerald-600'
+                                                : 'text-red-600',
+                                        ]"
+                                    >
+                                        {{
+                                            formatAmount(
+                                                transaction.amount,
+                                                transaction.currency?.code
+                                            )
+                                        }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-600">{{ transaction.currency }}</span>
+                                    <span class="text-sm text-gray-600">
+                                        {{
+                                            formatAmount(
+                                                transaction.fee,
+                                                transaction.currency?.code
+                                            )
+                                        }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div :class="[
-                                        'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium gap-1.5',
-                                        getTransactionStatus(transaction).class,
-                                    ]">
-                                        <component :is="getTransactionStatus(transaction).icon"
-                                                   class="w-4 h-4" />
-                                        {{ getTransactionStatus(transaction).text }}
+                                    <div
+                                        :class="[
+                                            'inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium gap-1.5',
+                                            getTransactionStatus(transaction)
+                                                .class,
+                                        ]"
+                                    >
+                                        <component
+                                            :is="
+                                                getTransactionStatus(
+                                                    transaction
+                                                ).icon
+                                            "
+                                            class="w-4 h-4"
+                                        />
+                                        {{
+                                            getTransactionStatus(transaction)
+                                                .text
+                                        }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <button @click="showDetails = showDetails === transaction.id ? null : transaction.id"
-                                            class="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-300">
+                                    <button
+                                        @click="
+                                            showDetails =
+                                                showDetails === transaction.uuid
+                                                    ? null
+                                                    : transaction.uuid
+                                        "
+                                        class="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-300"
+                                    >
                                         <Eye class="w-4 h-4" />
                                     </button>
                                 </td>
@@ -231,7 +357,9 @@ const toggleRowSelection = (id) => {
                 </div>
 
                 <!-- Пагинация -->
-                <div class="border-t border-gray-100 bg-white/80 backdrop-blur-xl">
+                <div
+                    class="border-t border-gray-100 bg-white/80 backdrop-blur-xl"
+                >
                     <Pagination :links="transactions.links" class="px-6 py-1" />
                 </div>
             </div>
