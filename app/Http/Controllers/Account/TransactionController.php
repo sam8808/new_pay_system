@@ -12,9 +12,10 @@ class TransactionController extends Controller
     public function index()
     {
         $transactions = Transaction::where('user_id', Auth::user()->id)
-            ->with(['payment', 'withdrawal', 'currency', 'wallet'])
+            ->with(['transactionable', 'currency', 'wallet'])
             ->orderByDesc('created_at')
             ->paginate(10);
+
 
         return Inertia::render('Account/Transactions', [
             'transactions' => $transactions
@@ -24,7 +25,7 @@ class TransactionController extends Controller
     public function show($uuid)
     {
         $transaction = Transaction::where('uuid', $uuid)
-            ->with(['payment', 'withdrawal', 'currency', 'wallet'])
+            ->with(['transactionable', 'currency', 'wallet'])
             ->firstOrFail();
 
         return Inertia::render('Account/Transaction', [

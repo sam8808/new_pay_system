@@ -15,37 +15,53 @@ class MainController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $wallets = $user->wallets()
-            ->with('currency')
-            ->get();
 
-        $merchants = $user->merchants();
+        // Eager load relationships for wallets
+        $wallets = $user->wallets()->with('currency')->get();
 
-        // Базовая статистика
-        $stats = [
-            'merchantsCount' => $merchants->count(),
+        // Get merchant IDs once to avoid multiple queries
+        $merchantIds = $user->merchants()->pluck('id');
 
-            // Входящие платежи за сегодня
-            'todayIncome' => Payment::whereIn('merchant_id', $merchants->pluck('id'))
-                ->where('status', 'completed')
-                ->whereDate('created_at', today())
+        // Get base statistics
+        $stats = $this->getBaseStats($user, $merchantIds);
+
+        // Get recent transactions with related data
+        $recentTransactions = $this->getRecentTransactions($user);
+
+        // Get monthly statistics
+        $monthlyStats = $this->getMonthlyStats($user, $merchantIds);
+
+        return Inertia::render('Account/Index', [
+            'wallets' => $wallets,
+            'stats' => $stats,
+            'recentTransactions' => $recentTransactions,
+            'monthlyStats' => $monthlyStats,
+        ]);
+    }
+
+    private function getBaseStats($user, $merchantIds): array
+    {
+        $today = today();
+
+        return [
+            'merchantsCount' => $merchantIds->count(),
+
+            'todayIncome' => Payment::whereIn('merchant_id', $merchantIds)
+                ->where('status', Payment::STATUS_COMPLETED_STRING)
+                ->whereDate('created_at', $today)
                 ->sum('amount_in_base_currency'),
 
-            // Выводы за сегодня    
             'todayWithdrawals' => Withdrawal::where('user_id', $user->id)
                 ->where('status', 'completed')
-                ->whereDate('created_at', today())
+                ->whereDate('created_at', $today)
                 ->sum('amount_in_base_currency'),
         ];
+    }
 
-        // Последние транзакции
-        $recentTransactions = Transaction::where('user_id', $user->id)
-            ->with([
-                'payment:id,merchant_id,amount,currency_id,status',
-                'withdrawal:id,amount,currency_id,status',
-                'currency:id,code,symbol',
-                'wallet:id,currency_id'
-            ])
+    private function getRecentTransactions($user): array
+    {
+        return Transaction::where('user_id', $user->id)
+            ->with(['transactionable', 'currency', 'wallet'])
             ->latest()
             ->take(5)
             ->get()
@@ -62,81 +78,88 @@ class MainController extends Controller
                     'type' => $transaction->type,
                     'status' => $transaction->status,
                     'created_at' => $transaction->created_at->format('Y-m-d H:i:s'),
-                    // Дополнительная информация в зависимости от типа
-                    'related_info' => $this->getRelatedTransactionInfo($transaction)
+                    'related_info' => $this->getTransactionRelatedInfo($transaction)
                 ];
-            });
+            })
+            ->toArray();
+    }
 
-        $monthlyStats = [
-            // Процент успешных платежей
-            'successRate' => $this->calculateSuccessRate($merchants->pluck('id')),
+    private function getMonthlyStats($user, $merchantIds): array
+    {
+        $now = now();
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
 
-            // Средний платёж за месяц
-            'averagePayment' => Payment::whereIn('merchant_id', $merchants->pluck('id'))
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->avg('amount_in_base_currency') ?? 0,
+        $monthlyTransactions = Transaction::where('user_id', $user->id)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear);
 
-            // Статистика по мерчантам
+        $monthlyCompletedPayments = Payment::whereIn('merchant_id', $merchantIds)
+            ->where('status', Payment::STATUS_COMPLETED_STRING)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear);
+
+        return [
+            'successRate' => $this->calculateSuccessRate($merchantIds),
+            'averagePayment' => $monthlyCompletedPayments->avg('amount_in_base_currency') ?? 0,
             'merchantsStats' => [
-                'active' => $merchants->where('is_active', true)
+                'active' => $user->merchants()
+                    ->where('is_active', true)
                     ->where('is_succes_moderation', true)
                     ->count(),
-                'total' => $merchants->count()
+                'total' => $merchantIds->count()
             ],
-
-            // Общая статистика за месяц
-            'totalTransactions' => Transaction::where('user_id', $user->id)
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->count(),
-
-            'monthlyVolume' => Transaction::where('user_id', $user->id)
+            'totalTransactions' => $monthlyTransactions->count(),
+            'monthlyVolume' => $monthlyTransactions
                 ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
                 ->sum('amount_in_base_currency')
         ];
+    }
 
-        return Inertia::render('Account/Index', [
-            'wallets' => $wallets,
-            'stats' => $stats,
-            'recentTransactions' => $recentTransactions,
-            'monthlyStats' => $monthlyStats,
-        ]);
+    private function getTransactionRelatedInfo(Transaction $transaction): array
+    {
+        $info = [];
+
+        if ($transaction->transactionable) {
+            switch (get_class($transaction->transactionable)) {
+                case Payment::class:
+                    $info = [
+                        'order_id' => $transaction->transactionable->order_id,
+                        'payer_email' => $transaction->transactionable->payer_email,
+                    ];
+                    break;
+
+                case Withdrawal::class:
+                    $info = [
+                        'recipient_data' => $transaction->transactionable->recipient_data,
+                        'external_id' => $transaction->transactionable->external_id,
+                    ];
+                    break;
+            }
+        }
+
+        return $info;
     }
 
     private function calculateSuccessRate($merchantIds)
     {
-        $stats = Payment::whereIn('merchant_id', $merchantIds)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->select(
-                DB::raw('COUNT(*) as total'),
-                DB::raw('COUNT(CASE WHEN status = "completed" THEN 1 END) as completed')
-            )
-            ->first();
+        $now = now();
+        $totalPayments = Payment::whereIn('merchant_id', $merchantIds)
+            ->whereMonth('created_at', $now->month)
+            ->whereYear('created_at', $now->year)
+            ->count();
 
-        return $stats->total > 0
-            ? round(($stats->completed / $stats->total) * 100)
-            : 0;
-    }
-
-    private function getRelatedTransactionInfo($transaction)
-    {
-        switch ($transaction->type) {
-            case 'deposit':
-                return $transaction->payment
-                    ? ['payment_id' => $transaction->payment->id]
-                    : null;
-            case 'withdrawal':
-                return $transaction->withdrawal
-                    ? ['withdrawal_id' => $transaction->withdrawal->id]
-                    : null;
-            default:
-                return null;
+        if ($totalPayments === 0) {
+            return 0;
         }
+
+        $successfulPayments = Payment::whereIn('merchant_id', $merchantIds)
+            ->where('status', Payment::STATUS_COMPLETED_STRING)
+            ->whereMonth('created_at', $now->month)
+            ->whereYear('created_at', $now->year)
+            ->count();
+
+        return ($successfulPayments / $totalPayments) * 100;
     }
 
     public function partners()

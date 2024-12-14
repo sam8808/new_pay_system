@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+<<<<<<< Updated upstream
             AdminSeeder::class,
             UserSeeder::class,
             CurrencySeeder::class,
@@ -36,6 +37,20 @@ class DatabaseSeeder extends Seeder
             GatewayPaymentSeeder::class,
             MerchantCouponsSeeder::class,
             WebhookNotificationSeeder::class,
+=======
+            // AdminSeeder::class,
+            // UserSeeder::class,
+            // CurrencySeeder::class,
+            // WalletSeeder::class,
+            // MerchantSeeder::class,
+            // PaymentSystemSeeder::class,
+            // PaymentSeeder::class,
+            // WithdrawalSeeder::class,
+            // TransactionSeeder::class,
+            // ExchangeRateSeeder::class,
+            // GatewayPaymentSeeder::class,
+            // WebhookNotificationSeeder::class,
+>>>>>>> Stashed changes
         ]);
     }
 }

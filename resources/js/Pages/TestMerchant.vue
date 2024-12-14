@@ -73,7 +73,14 @@ const handlePayment = async (product) => {
                 amount: product.price,
                 currency: 2,
                 description: 'Payment from test merchant',
+<<<<<<< Updated upstream
                 gateway_id: 3
+=======
+                client_data : {
+                	secret : '9e300bed5be7688f64ddb6e9e21d2315'
+                },
+                gateway_id : 1
+>>>>>>> Stashed changes
             }),
         });
 

@@ -23,14 +23,19 @@ class DepositController extends Controller
         ]);
     }
 
+
     public function store()
     {
         $deposit = $this->depositService
             ->validate()
             ->create();
 
-        return Redirect::route('deposit.show', [$deposit->uuid]);
+            dd($deposit);
+
+        return Redirect::route('deposit');
     }
+
+
 
     public function show(string $uuid)
     {

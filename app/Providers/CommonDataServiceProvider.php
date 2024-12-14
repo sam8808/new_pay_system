@@ -26,7 +26,7 @@ class CommonDataServiceProvider extends ServiceProvider
             ->where('rejected', false)
             ->count()) ?? 0;
 
-        view()->share('newPayment', Payment::where('status', Payment::STATUS_PENDING)
+        view()->share('newPayment', Payment::where('status', Payment::STATUS_COMPLETED_STRING)
             ->whereNotNull('receipt')
             ->count()) ?? 0;
 

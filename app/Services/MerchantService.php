@@ -20,7 +20,7 @@ class MerchantService
     private const VALIDATION_RULES = [
         'title' => ['required', 'string', 'max:255'],
         'domain' => ['nullable', 'string', 'url'],
-        'webhook_url' => ['required', 'string', 'unique:merchants,webhook_url', 'url:https'],
+        'webhook_url' => ['required', 'string', 'unique:merchants,webhook_url'], // 'url:https'
         'allowed_ips' => ['nullable', 'json'],
     ];
 

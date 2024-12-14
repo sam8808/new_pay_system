@@ -115,7 +115,7 @@
 	  </div>
 	</div>
 </template>
-<style>
+<style scoped>
 body {
   font-family: Arial;
   font-size: 17px;
