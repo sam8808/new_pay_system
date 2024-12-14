@@ -82,12 +82,17 @@ const handlePayment = async (product) => {
         }
 
         const result = await response.json();
+
+        if (!result.original.payment_link) {
+            throw new Error("Payment failed.");
+        }
         const paymentLink = result.original.payment_link;
         window.open(paymentLink, '_blank');
 
         successMessage.value = ``;
     } catch (error) {
         console.error(error);
+        alert(error.message);
         successMessage.value = "";
     } finally {
         loading.value = false;
