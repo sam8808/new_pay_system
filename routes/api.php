@@ -6,12 +6,12 @@ use App\Http\Controllers\API\ApiController;
 use App\Http\Controllers\API\GatewayPaymentController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Controllers\API\GatewayController;
-use App\Http\Controllers\API\TinkoffGatewayController;
-use App\Http\Controllers\API\SberGatewayController;
 
 // Статус платежа
 // Route::get('payments/{payment}/status', [ApiController::class, 'status'])
 //     ->name('api.payment.status');
+
+
 /**
  *
  * ## 5. Процесс обработки платежа
@@ -42,7 +42,15 @@ Route::prefix('payments')->group(function () {
     Route::get('sber/fail', [SberGatewayController::class, 'fail'])->name('sber.fail');
 });
 
-
 // handle payment system webhook
 Route::post('/webhook/payment-system', [WebhookController::class, 'handle'])->name('webhooks.paymentSystem');
+
+Route::prefix('tickets')->group(function () {
+    Route::post('/create', [TicketController::class, 'createTicket'])->name('tickets.create');
+    Route::get('/{id}', [TicketController::class, 'getAllMessages'])->name('tickets.create');
+
+    Route::prefix('/messages/')->group(function () {
+        Route::post('/create', [MessageController::class, 'createMessage'])->name('messages.create');
+    });
+});
 
