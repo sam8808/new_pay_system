@@ -30,8 +30,6 @@ class DepositController extends Controller
             ->validate()
             ->create();
 
-            dd($deposit);
-
         return Redirect::route('deposit');
     }
 
