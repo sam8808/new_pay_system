@@ -2,47 +2,149 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ApiController;
-
 use App\Http\Controllers\API\GatewayPaymentController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Controllers\API\GatewayController;
-
-// Статус платежа
-// Route::get('payments/{payment}/status', [ApiController::class, 'status'])
-//     ->name('api.payment.status');
-
+use App\Http\Controllers\API\TinkoffGatewayController;
+use App\Http\Controllers\API\SberGatewayController;
+use App\Http\Controllers\API\CryptomusGatewayController;
 
 /**
+ * ## Payment Processing Workflow
  *
- * ## 5. Процесс обработки платежа
+ * 1. The user initiates a payment on the merchant's website.
+ * 2. The merchant sends a payment creation request to the gateway.
+ * 3. The gateway forwards the request to the payment system.
+ * 4. The payment system returns a payment link.
+ * 5. The gateway provides the payment link to the merchant.
+ * 6. The merchant redirects the user to the payment page.
+ * 7. After completing the payment, the payment system sends a webhook notification.
+ * 8. The gateway processes the notification and informs the merchant of the result.
+ */
 
-    1. Пользователь инициирует платёж на сайте мерчанта
-    2. Мерчант отправляет запрос на создание платежа в шлюз
-    3. Шлюз формирует запрос к платёжной системе
-    4. Платёжная система возвращает ссылку на оплату
-    5. Шлюз передаёт ссылку мерчанту
-    6. Мерчант перенаправляет пользователя на оплату
-    7. После завершения платежа, платёжная система отправляет webhook-уведомление
-    8. Шлюз обрабатывает уведомление и отправляет результат мерчанту
-
- * */
+// Payment routes for various payment gateways
 Route::prefix('payments')->group(function () {
-    // 2-5 create a payment
+    /**
+     * Create a new payment.
+     * Sends a payment creation request to the gateway and returns the payment details.
+     *
+     * @route POST /payments/create
+     * @name payments.create
+     * @uses GatewayPaymentController::createPay
+     */
     Route::post('/create', [GatewayPaymentController::class, 'createPay'])->name('payments.create');
 
-    // get payment by ID
+    /**
+     * Get payment details by ID.
+     * Fetches the details of a specific payment.
+     *
+     * @route GET /payments/{id}
+     * @name payments.show
+     * @uses GatewayPaymentController::getPayment
+     */
     Route::get('/{id}', [GatewayPaymentController::class, 'getPayment'])->name('payments.show');
 
+    // Tinkoff payment routes
+    /**
+     * Handle Tinkoff payment webhook notifications.
+     *
+     * @route POST /payments/tinkoff/webhook
+     * @name tinkoff.webhook
+     * @uses TinkoffGatewayController::webhook
+     */
     Route::post('/tinkoff/webhook', [TinkoffGatewayController::class, 'webhook'])->name('tinkoff.webhook');
+
+    /**
+     * Handle Tinkoff payment success redirection.
+     *
+     * @route GET /payments/tinkoff/success
+     * @name tinkoff.success
+     * @uses TinkoffGatewayController::success
+     */
     Route::get('/tinkoff/success', [TinkoffGatewayController::class, 'success'])->name('tinkoff.success');
+
+    /**
+     * Handle Tinkoff payment failure redirection.
+     *
+     * @route GET /payments/tinkoff/fail
+     * @name tinkoff.fail
+     * @uses TinkoffGatewayController::fail
+     */
     Route::get('/tinkoff/fail', [TinkoffGatewayController::class, 'fail'])->name('tinkoff.fail');
 
+    // Sber payment routes
+    /**
+     * Handle Sber payment webhook notifications.
+     *
+     * @route POST /payments/sber/webhook
+     * @name sber.webhook
+     * @uses SberGatewayController::webhook
+     */
     Route::post('sber/webhook', [SberGatewayController::class, 'webhook'])->name('sber.webhook');
+
+    /**
+     * Handle Sber payment success redirection.
+     *
+     * @route GET /payments/sber/success
+     * @name sber.success
+     * @uses SberGatewayController::success
+     */
     Route::get('sber/success', [SberGatewayController::class, 'success'])->name('sber.success');
+
+    /**
+     * Handle Sber payment failure redirection.
+     *
+     * @route GET /payments/sber/fail
+     * @name sber.fail
+     * @uses SberGatewayController::fail
+     */
     Route::get('sber/fail', [SberGatewayController::class, 'fail'])->name('sber.fail');
+
+    // Cryptomus payment routes
+    /**
+     * Generate a payment link using the Cryptomus API.
+     *
+     * @route POST /payments/cryptomus/payment-link
+     * @uses CryptomusGatewayController::getPaymentLink
+     */
+    Route::post('cryptomus/payment-link', [CryptomusGatewayController::class, 'getPaymentLink']);
+
+    /**
+     * Handle Cryptomus payment webhook notifications.
+     *
+     * @route POST /payments/cryptomus/webhook
+     * @name cryptomus.webhook
+     * @uses CryptomusGatewayController::webhook
+     */
+    Route::post('cryptomus/webhook', [CryptomusGatewayController::class, 'webhook'])->name('cryptomus.webhook');
+
+    /**
+     * Handle Cryptomus payment success redirection.
+     *
+     * @route GET /payments/cryptomus/success
+     * @name cryptomus.success
+     * @uses CryptomusGatewayController::success
+     */
+    Route::get('cryptomus/success', [CryptomusGatewayController::class, 'success'])->name('cryptomus.success');
+
+    /**
+     * Handle Cryptomus payment failure redirection.
+     *
+     * @route GET /payments/cryptomus/fail
+     * @name cryptomus.fail
+     * @uses CryptomusGatewayController::fail
+     */
+    Route::get('cryptomus/fail', [CryptomusGatewayController::class, 'fail'])->name('cryptomus.fail');
 });
 
-// handle payment system webhook
+/**
+ * Handle payment system webhook notifications.
+ * Processes webhook payloads from various payment systems.
+ *
+ * @route POST /webhook/payment-system
+ * @name webhooks.paymentSystem
+ * @uses WebhookController::handle
+ */
 Route::post('/webhook/payment-system', [WebhookController::class, 'handle'])->name('webhooks.paymentSystem');
 
 Route::prefix('tickets')->group(function () {
