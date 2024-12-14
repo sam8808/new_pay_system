@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, defineProps } from "vue";
-
+import Tickets from "../Components/Tickets.vue";
 // Состояния
 const isMobileMenuOpen = ref(false);
 const isScrolled = ref(false);
@@ -12,8 +12,10 @@ const isSubmitting = ref(false);
 
 defineProps({
     title: String,
+    ticket: Array | null,
+    auth: Boolean,
+    adminTickets : Array | null,
 });
-
 // Форма и ошибки
 const form = ref({
     name: "",
@@ -245,6 +247,9 @@ onUnmounted(() => {
 </script>
 
 <template>
+    <div class="ticket-sidebar">
+        <Tickets :isAdmin="auth" :ticket="ticket"/>
+    </div>
     <Head :title="title" />
     <div
         class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-violet-100 to-gray-100"
@@ -1091,5 +1096,12 @@ onUnmounted(() => {
 /* Улучшенные фокус-стили */
 .focus-ring {
     @apply focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500;
+}
+.ticket-sidebar{
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    z-index: 999;
+
 }
 </style>
