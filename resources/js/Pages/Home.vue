@@ -14,6 +14,7 @@ defineProps({
     title: String,
     ticket: Array | null,
     auth: Boolean,
+
     adminTickets : Array | null,
 });
 // Форма и ошибки
