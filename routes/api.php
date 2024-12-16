@@ -5,6 +5,12 @@ use App\Http\Controllers\API\ApiController;
 use App\Http\Controllers\API\GatewayPaymentController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Controllers\API\GatewayController;
+use App\Http\Controllers\Ticket\TicketController;
+use \App\Http\Controllers\Ticket\MessageController;
+// Статус платежа
+// Route::get('payments/{payment}/status', [ApiController::class, 'status'])
+//     ->name('api.payment.status');
+
 use App\Http\Controllers\API\TinkoffGatewayController;
 use App\Http\Controllers\API\SberGatewayController;
 use App\Http\Controllers\API\CryptomusGatewayController;
@@ -147,12 +153,22 @@ Route::prefix('payments')->group(function () {
  */
 Route::post('/webhook/payment-system', [WebhookController::class, 'handle'])->name('webhooks.paymentSystem');
 
-Route::prefix('tickets')->group(function () {
-    Route::post('/create', [TicketController::class, 'createTicket'])->name('tickets.create');
-    Route::get('/{id}', [TicketController::class, 'getAllMessages'])->name('tickets.create');
+Route::middleware("auth:sanctum")->group(function () {
+    Route::prefix('tickets')->group(function () {
+        Route::get('/', [TicketController::class, 'index']);
+        Route::put('/assign', [TicketController::class, 'assign']);
+        Route::put('/{id}', [TicketController::class, 'update']);
+        Route::post('/create', [TicketController::class, 'createTicket'])->name('tickets.create');
+        Route::get('/{id}', [TicketController::class, 'getAllMessages'])->name('tickets.create');
 
-    Route::prefix('/messages/')->group(function () {
-        Route::post('/create', [MessageController::class, 'createMessage'])->name('messages.create');
+        Route::prefix('/messages/')->group(function () {
+            Route::post('/create', [MessageController::class, 'createMessage'])->name('messages.create');
+            Route::post('/send', [MessageController::class, 'sendMessage'])->name('messages.send');
+            Route::get('/{id}', [MessageController::class, 'index'])->name('messages.create');
+        });
     });
 });
-
+Route::middleware("auth.auth")->group(function () {
+    Route::prefix('admin/tickets')->group(function () {
+    });
+});

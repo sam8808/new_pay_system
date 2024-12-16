@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Attachment;
 
 class TicketMessage extends Model
 {
@@ -17,4 +18,5 @@ class TicketMessage extends Model
         'attachments',
         'is_internal'
     ];
+
 }

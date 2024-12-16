@@ -8,7 +8,7 @@
                 <button @click="handleFlip" data-flip=".ticket-wrapper">Мои былеты</button>
                 <div v-if="ticket instanceof Array && ticket.length" class="user-tickets">
                     <ul>
-                        <li class="ticket-card user__mine-tickets" v-for="(item, index) in ticket" :key="item.id" :data-chat="item.id" @click="handleSetChaT">
+                        <li class="ticket-card user__mine-tickets" v-for="(item) in ticket" :key="item.id" :data-chat="item.id" @click="handleSetChaT">
                             <span class="subject-item">
                                 Subject: {{item.subject}}
                             </span>
@@ -33,23 +33,29 @@
             </div>
             <div v-else class="admin-tickets">
                 <div class="tickets-face">
-                    <ul class="waiting-ticket-list ticket-card">
-                        <li class="ticket-card" v-for="(item,index) in ticket" :key="index">
-                            <span>{{item.user.email}}</span>
-                            <span> {{item.category}}</span>
-                            <span> {{item.subject}}</span>
+                    <span>Waiting list</span>
+                    <ul class="waiting-ticket-list">
+                        <li class="ticket-card" v-for="(item,index) in ticket.waiting ?? []" :key="index" @click="hanndleAssign(item.id)">
+                            <span>User: {{item.user.email}}</span>
+                            <span> Category: {{ item.category}}</span>
+                            <span> Subject: {{item.subject}}</span>
                         </li>
                     </ul>
                 </div>
-                <div class="tickets-back">
-                    <ul class="mine-ticket-list ticket-card">
-                        <li class="ticket-card" v-for="(item,index) in ticket" :key="index">
-                            <span>{{item.user.email}}</span>
-                            <span> {{item.category}}</span>
-                            <span> {{item.subject}}</span>
+                <div class="ticket-back">
+                    <span>Mine list</span>
+                    <ul class="waiting-ticket-list" v-if="(ticket.mine ?? []).length">
+                        <li class="ticket-card" @click="handleSetChaT" :data-chat="item.id" v-for="(item,index) in ticket.mine ?? []" :key="index">
+                            <span>User: {{item.user?.email}}</span>
+                            <span> Category: {{ item.category}}</span>
+                            <span> Subject: {{item.subject}}</span>
                         </li>
                     </ul>
+                    <div v-else>
+                        Mine list is empty
+                    </div>
                 </div>
+
             </div>
         </div>
         <div class="chat-wrapper">
@@ -84,7 +90,8 @@
                     <textarea name="" @keydown.enter="handleEnter"
                               @keydown.ctrl.enter="insertLineBreak" v-model="message"
                               placeholder="message..." id=""  rows="1"></textarea>
-                    <button>Send</button>
+                <input type="file" multiple @change="handleFileUpload">
+                    <button @click="createMessage">Send</button>
             </div>
         </div>
 
@@ -149,6 +156,7 @@
         .user-tickets{
             position: absolute;
             inset: var(--padding);
+            top: 45px;
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
             transform: rotateY(180deg);
@@ -171,6 +179,17 @@
             span{
                 flex: 1 1 100%;
             }
+        }
+
+    }
+    .waiting-ticket-list{
+        display: grid;
+        gap: 12px;
+        max-height:  270px;
+        overflow: scroll;
+        .ticket-card{
+            border: 1px solid black;
+            cursor: pointer;
         }
     }
     .chat-wrapper{
@@ -221,6 +240,16 @@
     }
 </style>
 <script>
+    import Pusher from 'pusher-js';
+    // Pusher.logToConsole = true;
+
+    let pusher = new Pusher('44ad2638c84f29a1cf6a', {
+        cluster: 'ap2'
+    })
+
+    let channel = pusher.subscribe('my-channel');
+
+
     export default {
         name: "Tickets",
         props : {
@@ -228,16 +257,14 @@
                 type: Boolean,
                 default: false
             },
-            ticket: {
-                type: Array,
-                default: []
-            }
         },
        data(){
             return {
                 "message" : '',
                 "messages" : [],
                 'chatId' : null,
+                'ticket' : [],
+                'attachments' : [],
             }
        },
         methods : {
@@ -247,7 +274,6 @@
                 data.forEach((value, key)=>{
                     json[key] = value;
                 })
-                console.log(`${window.location.host}/api/tickets/create`)
                 let result = await fetch(`http://${window.location.host}/api/tickets/create`, {
                     method: 'POST',
                     headers: {
@@ -255,6 +281,10 @@
                     },
                     body : JSON.stringify(json)
                 })
+                result = await result.json();
+                this.ticket.push(result.ticket)
+                e.target.reset();
+
             },
             handleToggler(){
                 this.$el.parentElement.querySelector('.ticket-wrapper').classList.toggle('show')
@@ -265,7 +295,7 @@
             handleEnter(event) {
                 if (!event.ctrlKey) {
                     event.preventDefault();
-                    this.sendMessage();
+                    this.createMessage();
                 }
             },
             insertLineBreak(event) {
@@ -295,42 +325,93 @@
                 this.chatId = null;
                 chat.classList.remove('show')
             },
-            async sendMessage() {
-                if (this.message.trim() !== "") {
+            hanndleAssign(id){
+                let ticket = this.ticket.waiting.splice(
+                    this.ticket.waiting.findIndex(item=>item.id===id),1
+                )[0]
+                fetch(`${window.location.origin}/api/tickets/assign`, {
+                    body: JSON.stringify({id: id}),
+                    method: "PUT",
+                    headers: {
+                        'Content-type': 'application/json'
+                    }
+                }).then(result=>{
+                    if(result.ok){
+                        this.ticket.mine.push(ticket);
+                        this.setChat(id);
+                    }
+                })
+
+            },
+            async createMessage() {
+                if (this.message.trim() !== "" || this.attachments ) {
+                    const fd = new FormData();
+                    this.attachments.forEach((file, index) => {
+                        fd.append(`files[${index}]`, file);
+                    })
+                    fd.append('message', this.message);
+                    fd.append('ticket_id' , this.chatId);
+
                     let response = await fetch(`${window.location.origin}/api/tickets/messages/create`, {
                         method: "POST",
-                        body : JSON.stringify({
-                            'message' : this.message,
-                            'ticket_id' : this.chatId,
-                        }),
-                        headers : {
-                            "Content-type" : 'application/json'
-                        }
-
+                        body : fd,
                     })
-                    let result = await response.json();
-                    this.messages.push(result.messageObject);
                     this.message = "";
+                    let result = await response.json();
+                    if(result.ok){
+                        this.messages.push(result.messageObject);
+                        this.sendMessage(result.messageObject);
+                    }
                 }
+
+            },
+            sendMessage(message){
+                fetch(`${window.location.origin}/api/tickets/messages/send`, {
+                    body: JSON.stringify({message: message}),
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    }
+                }).then(result=>{
+                    if(!result.ok){
+                        console.log(result)
+                    }
+                })
             },
             async getChatMessages(id) {
                 let response = await fetch(`${window.location.origin}/api/tickets/${id}`);
-                const result = await response.json();
-
-                return result;
+                return await response.json();
             },
             async setChat(id){
                 let chatWrapper = document.querySelector('.ticket-sidebar .chat-wrapper');
-                let data = await fetch(`${window.location.origin}/api/tickets/${id}`);
-                this.messages = await data.json()
+                this.messages = await this.getChatMessages(id);
                 chatWrapper.classList.add('show');
                 this.chatId = id;
             },
-
+            handleFileUpload(event){
+                this.attachments = Array.from(event.target.files);
+            },
         },
 
         async mounted() {
+            fetch(`${window.location.origin}/api/tickets/`).then(result=>{
+                result.json().then(data=>{
+                    this.ticket = data;
+                    console.log(data)
 
+                })
+            })
+
+            channel.bind('my-event', (data)=>{
+                if (
+                    data &&
+                    data.message &&
+                    data.message.id && // Проверяем, что `id` существует
+                    !this.messages.some((msg) => parseInt(msg.id) === parseInt(data.message.id))
+                ) {
+                    this.messages.push(data.message); // Добавляем сообщение, если его нет
+                }
+            })
         }
     }
 
