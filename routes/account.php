@@ -8,9 +8,9 @@ use App\Http\Controllers\Account\TransferController;
 use App\Http\Controllers\Account\MerchantController;
 use App\Http\Controllers\Account\WithdrawalController;
 use App\Http\Controllers\Account\TransactionController;
+use Illuminate\Support\Facades\Auth;
 
-
-
+// dd(Auth::user());
 
 Route::prefix('account')->middleware('auth')->group(function () {
 

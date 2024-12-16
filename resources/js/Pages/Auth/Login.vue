@@ -14,6 +14,16 @@ const page = usePage();
 
 const companyName = "Payment System";
 const loading = ref(false);
+const show = ref(false);
+
+const code1 = ref('');
+const code2 = ref('');
+const code3 = ref('');
+const code4 = ref('');
+const code5 = ref('');
+const code6 = ref('');
+
+const twoFaError = ref('');
 
 const form = reactive({
     email: "",
@@ -29,11 +39,78 @@ const submit = () => {
         },
     });
 };
+
+const focusNext = (event, nextInput) => {
+    if (event.target.value.length === 1) {
+        const nextElement = document.getElementById(nextInput);
+        if (nextElement) {
+            nextElement.focus();
+        }
+    }
+};
+
+/**
+ * Send 2FA code
+ * */
+const process2FA = () => {
+    fetch(route("2fa.send"), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+        },
+        body: JSON.stringify({ form }),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // Assuming the server returns a JSON response
+            if (data.sent) {
+                show.value = true; // Handle success
+            } else {
+                console.error("Failed to send 2FA code");
+            }
+        })
+        .catch((error) => {
+            console.error("There was a problem with the fetch operation:", error);
+        });
+
+};
+
+const verify2FA = () => {
+    const code = code1.value + code2.value + code3.value + code4.value + code5.value + code6.value;
+
+    fetch(route("2fa.verify"), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: code, form : form }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Handle response data
+            if(data.verified){
+                submit()
+            }else{
+                twoFaError.value = 'Wrong code!'
+            }
+
+        })
+        .finally(() => {
+            loading.value = false;
+        });
+
+};
 </script>
 
 <template>
-    <div
-        class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-violet-100 to-gray-100 flex flex-col justify-center items-center p-6"
+    <div v-show="!show"
+        class="login-form min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-violet-100 to-gray-100 flex flex-col justify-center items-center p-6"
     >
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div
@@ -60,7 +137,7 @@ const submit = () => {
                 </div>
 
                 <!-- Form section -->
-                <form @submit.prevent="submit" class="space-y-4">
+                <form @submit.prevent="process2FA" class="space-y-4">
                     <FormInput
                         v-model="form.email"
                         title="Email"
@@ -261,6 +338,105 @@ const submit = () => {
             </p>
         </div>
     </div>
-</template>
 
-<style></style>
+    <div
+        v-show="show"
+        class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))]
+         from-blue-100 via-violet-100 to-gray-100 flex flex-col justify-center items-center p-6"
+    >
+        <div class="flex flex-col items-center mb-6">
+            <!-- Add Illustration -->
+            <div class="text-blue-500 text-6xl mb-4">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="text-2xl font-semibold text-gray-700 text-center">
+                Two-Factor Authentication
+            </h1>
+            <p class="text-gray-500 text-center mt-2">
+                Please enter the 6-digit code sent to your email or phone.
+            </p>
+        </div>
+
+        <form class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+            <!-- Input Group for 2FA Code -->
+            <div class="twofa-input-group flex justify-between mb-6">
+                <input
+                    type="text"
+                    maxlength="1"
+                    v-model="code1"
+                    id="code1"
+                    @input="focusNext($event, 'code2')"
+                    class="w-12 h-12 rounded-md border-2 text-center text-xl
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     border-gray-300 transition"
+                />
+                <input
+                    type="text"
+                    maxlength="1"
+                    v-model="code2"
+                    id="code2"
+                    @input="focusNext($event, 'code3')"
+                    class="w-12 h-12 rounded-md border-2 text-center text-xl
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     border-gray-300 transition"
+                />
+                <input
+                    type="text"
+                    maxlength="1"
+                    v-model="code3"
+                    id="code3"
+                    @input="focusNext($event, 'code4')"
+                    class="w-12 h-12 rounded-md border-2 text-center text-xl
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     border-gray-300 transition"
+                />
+                <input
+                    type="text"
+                    maxlength="1"
+                    v-model="code4"
+                    id="code4"
+                    @input="focusNext($event, 'code5')"
+                    class="w-12 h-12 rounded-md border-2 text-center text-xl
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     border-gray-300 transition"
+                />
+                <input
+                    type="text"
+                    maxlength="1"
+                    v-model="code5"
+                    id="code5"
+                    @input="focusNext($event, 'code6')"
+                    class="w-12 h-12 rounded-md border-2 text-center text-xl
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     border-gray-300 transition"
+                />
+                <input
+                    type="text"
+                    maxlength="1"
+                    v-model="code6"
+                    id="code6"
+                    class="w-12 h-12 rounded-md border-2 text-center text-xl
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     border-gray-300 transition"
+                />
+            </div>
+            <h5 class="errorMessage">{{twoFaError}}</h5>
+            <!-- Submit Button -->
+            <button
+                @click="verify2FA"
+                type="button"
+                class="w-full mt-2 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600
+                 transition duration-200 text-lg font-medium flex items-center justify-center"
+            >
+                <i class="fas fa-check-circle mr-2"></i>
+                Verify
+            </button>
+        </form>
+    </div>
+
+</template>
+<style>
+.errorMessage{
+    color : red;
+}
+</style>

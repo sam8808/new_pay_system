@@ -24,10 +24,6 @@ return new class extends Migration
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('used_at')->nullable();
             $table->timestamps();
-
-            $table->foreign('merchant_id')->references('id')->on('merchants');
-            $table->foreign('payment_id')->references('id')->on('payments');
-            $table->foreign('currency_id')->references('id')->on('currencies');
         });
     }
 

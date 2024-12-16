@@ -102,7 +102,6 @@ class LoginService
                 ]);
                 return;
             }
-
             $this->user = Auth::user();
             $this->updateLastLogin();
 
@@ -225,5 +224,5 @@ class LoginService
         return self::CACHE_KEY_PREFIX . request()->ip();
     }
 
-    
+
 }
