@@ -14,7 +14,7 @@ defineProps({
     title: String,
     ticket: Array | null,
     auth: Boolean,
-
+    admin: Boolean,
     adminTickets : Array | null,
 });
 // Форма и ошибки
@@ -248,8 +248,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="ticket-sidebar">
-        <Tickets :isAdmin="auth" :ticket="ticket"/>
+    <div class="ticket-sidebar" v-if="auth || admin ">
+        <Tickets :isAdmin="admin"/>
     </div>
     <Head :title="title" />
     <div
