@@ -24,6 +24,10 @@ return new class extends Migration
             $table->boolean('is_verified')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->json('settings')->nullable();
+            $table->enum('two_factor_type', [
+                'email',
+                'sms'
+            ])->default('email');
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

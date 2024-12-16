@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TestMerchantController;
 use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\MerchantCouponsController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -23,6 +24,7 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [LoginController::class, 'store'])
         ->name('login.store');
+
 
     //     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
     //         ->name('password.request');
@@ -74,3 +76,17 @@ Route::middleware('auth')->group(function () {
     Route::post('merchant-coupon/verify', [MerchantCouponsController::class, 'verify'])->name('merchant-coupon.verify');
     Route::resource('merchant-coupon', MerchantCouponsController::class);
 });
+
+
+
+    // Управление двухфакторной аутентификацией
+    Route::prefix('2fa')->group(function () {
+        Route::post('toggle', [TwoFactorController::class, 'toggle'])
+            ->name('2fa.toggle');
+        Route::post('verify', [TwoFactorController::class, 'verify'])
+            ->name('2fa.verify');
+        Route::post('send', [TwoFactorController::class, 'send'])
+                    ->name('2fa.send');
+    });
+
+
