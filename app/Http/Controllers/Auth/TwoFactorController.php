@@ -35,8 +35,15 @@ class TwoFactorController extends Controller
     // Проверка кода 2FA
     public function verify(TwoFactorRequest $request): JsonResponse
     {
+      $user = $this->getUser($request);
+            if(!$user){
+                return response()->json([
+                    'sent' => false,
+                ]);
+            }
+
         $verified = $this->twoFactorService->verify(
-            $user = $this->getUser($request),
+            $user,
             $request->input('code')
         );
 
@@ -50,10 +57,8 @@ class TwoFactorController extends Controller
         $user = User::where('email', $request->form['email'])->first();
 
         // Check if user exists
-        if (!$user) {
-            return response()->json([
-                'sent' => false
-            ]);
+        if ($user === null) {
+           return false;
         }
 
         return $user;
@@ -63,6 +68,12 @@ class TwoFactorController extends Controller
     public function send(Request $request)
     {
         $user = $this->getUser($request);
+
+        if(!$user){
+            return response()->json([
+                'sent' => false,
+            ]);
+        }
 
         // Send the code via your service and return response
         $sent = $this->twoFactorService->sendCode($user);
