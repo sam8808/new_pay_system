@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\MerchantCoupons;
 /**
  * Class GatewayController
  * Handles payment processing by directing requests to the appropriate payment gateway.
@@ -72,4 +72,25 @@ class GatewayController extends Controller
         // Return the response as JSON
         return response()->json($response);
     }
+
+    public function processCouponPayment(MerchantCoupons $coupon){
+       switch ($coupon->payment->payment_system_id) {
+           case self::GATEWAY_DEFAULT:
+               return $this->couponPayment($coupon);
+           case self::GATEWAY_TINKOFF:
+               return (new TinkoffGatewayController())->couponPayment($coupon);
+           case self::GATEWAY_SBER:
+               return (new SberGatewayController())->couponPayment($coupon);
+           case self::GATEWAY_CRYPTOMUS:
+               return (new CryptomusGatewayController())->couponPayment($coupon);
+           default:
+               // Handle unsupported gateway ID
+               return response()->json(['error' => 'Unsupported gateway ID'], 400);
+       }
+    }
+
+    public function couponPayment(MerchantCoupons $coupon){
+        return true;
+    }
+
 }

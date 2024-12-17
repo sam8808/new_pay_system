@@ -6,10 +6,12 @@ use App\Http\Requests\StoreMerchantCouponsRequest;
 use App\Http\Requests\UpdateMerchantCouponsRequest;
 use App\Models\MerchantCoupons;
 use App\Models\Payment;
+use App\Models\Merchant;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use App\Http\Controllers\API\GatewayController;
 
 class MerchantCouponsController extends Controller
 {
@@ -63,10 +65,11 @@ class MerchantCouponsController extends Controller
 
         $uuid = Str::uuid();
         $couponCode = substr(Str::uuid()->toString(), 0, 8);
+        $merchant_id = Merchant::where('merchant_id', $data['merchant_id'])->first()->id;
 
         $payment = Payment::create([
             'uuid' => $uuid,
-            'merchant_id' => $data['merchant_id'] ?? null, // Use $data['merchant_id'] or fallback to null
+            'merchant_id' => $merchant_id,
             'payment_system_id' => $data['gateway_id'] ?? 1, // Fallback to 1 if not provided
             'currency_id' => $data['currency_id'] ?? 2, // Fallback to 2 (USD) if not provided
             'order_id' => $uuid, // ID заказа в системе мерчанта
@@ -85,7 +88,7 @@ class MerchantCouponsController extends Controller
         $payment->save();
 
         $merchantCoupon = MerchantCoupons::create([
-            'merchant_id' => $data['merchant_id'] ?? null, // Fallback to null if not provided
+            'merchant_id' => $merchant_id,
             'payment_id' => $payment->id, // Payment ID should always be set
             'code' => $couponCode, // Coupon code is passed directly
             'amount' => $data['amount'] ?? 0, // Fallback to 0 if 'amount' is not provided
@@ -160,16 +163,22 @@ class MerchantCouponsController extends Controller
         ]);
     }
 
-    // система проверяет:
+    /**
+     * Verify a coupon and process its payment.
+     *
+     * This method performs the following:
+     * - Finds a pending coupon by its code.
+     * - Validates if the coupon exists, is not expired, and has a valid amount.
+     * - Processes the coupon payment through the GatewayController.
+     * - Marks the coupon as used, confirms the payment, and updates the user's wallet balance.
+     *
+     * @param \Illuminate\Http\Request $request The incoming HTTP request containing the coupon code.
+     *
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating the verification result.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the coupon does not exist or has already been used.
+     */
 
-    // Валидность купона
-    // Срок действия
-    // Статус (не использован)
-    // Сумму
-
-    // После проверки помечает купон использованным
-    // Подтверждает платеж
-    // Зачисляет средства мерчанту
     public function verify(Request $request)
     {
         // Find the coupon by code and ensure it is pending
@@ -191,23 +200,33 @@ class MerchantCouponsController extends Controller
             return response()->json(['message' => 'Invalid coupon amount'], 400);
         }
 
-        // Mark coupon as used
-        $coupon->status = MerchantCoupons::STATUS_USED_STRING;
-        $coupon->used_at = now();
-        $coupon->save();
+        if((new GatewayController())->processCouponPayment($coupon)){
+            // Mark coupon as used
+            $coupon->status = MerchantCoupons::STATUS_USED_STRING;
+            $coupon->used_at = now();
+            $coupon->save();
 
-        // Confirm payment (example: marking payment as successful)
-        $coupon->payment->status = Payment::STATUS_COMPLETED_STRING;
-        $coupon->payment->save();
+            // Confirm payment (example: marking payment as successful)
+            $coupon->payment->status = Payment::STATUS_COMPLETED_STRING;
+            $coupon->payment->save();
 
+            // update user balance
+            $wallet = $coupon->payment->merchant->user->wallets()->where('currency_id', $coupon->payment->currency_id)->first();
+            $wallet->addToBalance($coupon->payment->amount_in_base_currency);
 
-        $wallet = $coupon->payment->merchant->user->wallets()->where('currency_id', $coupon->payment->currency_id)->first();
-        $wallet->addToBalance($coupon->payment->amount_in_base_currency);
-
-        return response()->json([
-            'message' => 'Coupon verified and payment confirmed',
-            'code' => $coupon->code,
-            'amount' => $coupon->amount
-        ], 200);
+            return response()->json([
+                'message' => 'Coupon verified and payment confirmed',
+                'code' => $coupon->code,
+                'amount' => $coupon->amount,
+                'success' => true
+            ], 200);
+        }else{
+            return response()->json([
+                'message' => 'Coupon not verified and payment not confirmed',
+                'code' => $coupon->code,
+                'amount' => $coupon->amount,
+                'success' => false
+            ], 400);
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\GatewayPayment;
 use App\Models\Payment;
+use App\Models\Merchant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +37,7 @@ class GatewayPaymentController extends Controller
 
         $payment = Payment::create([
             'uuid' => $uuid,
-            'merchant_id' => $data['merchant_id'],
+            'merchant_id' => Merchant::where('merchant_id', $data['merchant_id'])->first()->id,
             'payment_system_id' => $data['gateway_id'] ?? 1,
             'currency_id' => $data['currency_id'] ?? 2, //usd
             'order_id' => $uuid, // ID заказа в системе мерчанта

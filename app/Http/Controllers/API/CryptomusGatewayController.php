@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\MerchantCoupons;
 
 class CryptomusGatewayController extends Controller
 {
@@ -117,4 +118,60 @@ class CryptomusGatewayController extends Controller
     {
         return response()->json(['message' => 'Payment failed.']);
     }
+
+    /**
+     * Handles regular payments through the Cryptomus API.
+     *
+     * @param array $request The HTTP request containing payment details.
+     * @return \Illuminate\Http\JsonResponse A JSON response with the payment link or error message.
+     */
+    public function regularPayment(array $request)
+    {
+        $amount = $request['amount'];
+        $currency = $request['currency'];
+        $orderId = $request['order_id'];
+        $description = $request['description'] ?? 'Regular Payment';
+
+        // Cryptomus API credentials
+        $merchantKey = env('CRYPTOMUS_MERCHANT_KEY');
+        $secretKey = env('CRYPTOMUS_SECRET_KEY');
+        $url = 'https://api.cryptomus.com/v1/payment';
+
+        $data = [
+            'amount' => $amount,
+            'order_id' => $orderId,
+            'currency' => $currency,
+            'description' => $description,
+            'callback_url' => route('cryptomus.webhook'),
+        ];
+
+        $signature = hash_hmac('sha256', json_encode($data), $secretKey);
+        $headers = ['merchant' => $merchantKey, 'sign' => $signature];
+
+        try {
+            $response = Http::withHeaders($headers)->post($url, $data);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                return response()->json([
+                    'payment_link' => $responseData['result']['url'] ?? '',
+                ]);
+            }
+            return response()->json(['error' => 'Failed to process regular payment.'], 400);
+        } catch (\Exception $e) {
+            Log::error('Regular Payment Error: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while processing regular payment.'], 500);
+        }
+    }
+
+    public function couponPayment(MerchantCoupons $coupon)
+    {
+        return $this->regularPayment([
+            'amount' => $coupon->amount,
+            'currency' => $coupon->payment->currency_id,
+            'order_id' => $coupon->payment->external_id,
+            'description' => $coupon->payment->description ?? 'Regular Payment', // Fixed the semicolon issue
+        ]);
+    }
+
 }
