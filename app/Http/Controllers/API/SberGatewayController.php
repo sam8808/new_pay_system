@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\MerchantCoupons;
 
 class SberGatewayController extends Controller
 {
@@ -117,4 +118,74 @@ class SberGatewayController extends Controller
         // Payment failure handler
         return response()->json(['message' => 'Payment failed.']);
     }
+
+    /**
+     * Processes a regular payment using the SberBank API.
+     *
+     * This method processes a standard payment (non-link based) by directly
+     * submitting the required details to the SberBank API and verifying the result.
+     *
+     * @param Request $request The HTTP request containing payment details.
+     * @return \Illuminate\Http\JsonResponse A JSON response with the payment result.
+     */
+    public function regularPayment(array $request)
+    {
+        $amount = $request['amount']; // Amount to be paid
+        $orderId = $request['order_id']; // Unique order ID
+        $description = $request['description']; // Payment description
+
+        // SberBank API credentials
+        $login = env('SBER_LOGIN');
+        $password = env('SBER_PASSWORD');
+
+        // API endpoint for payment
+        $url = env('SBER_API_URL') . 'payment.do';
+
+        // Prepare data for the API request
+        $data = [
+            'userName' => $login,
+            'password' => $password,
+            'orderNumber' => $orderId,
+            'amount' => $amount,
+            'description' => $description,
+        ];
+
+        // Make the HTTP POST request to SberBank API
+        try {
+            $response = Http::post($url, $data);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+
+                // Check for a successful payment response
+                if (isset($responseData['errorCode']) && $responseData['errorCode'] == 0) {
+                    return response()->json([
+                        'message' => 'Payment processed successfully.',
+                        'order_id' => $orderId,
+                        'amount' => $amount,
+                        'status' => 'success',
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'error' => 'Payment failed.',
+                        'error_message' => $responseData['errorMessage'] ?? 'Unknown error',
+                    ], 400);
+                }
+            } else {
+                return response()->json(['error' => 'Failed to connect to SberBank API.'], 500);
+            }
+        } catch (\Exception $e) {
+            Log::error('SberBank Regular Payment Error: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred during payment processing.'], 500);
+        }
+    }
+
+    public function couponPayment(MerchantCoupons $coupon){
+        $this->regularPayment([
+            'amount' => $coupon->amount,
+            'order_id' => $coupon->payment->external_id,
+            'description' => $coupon->payment->description ?? 'Payment from gateway'
+        ]);
+    }
+
 }
