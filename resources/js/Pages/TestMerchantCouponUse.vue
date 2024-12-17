@@ -21,7 +21,7 @@ const useCoupon = async () => {
                 "X-CSRF-TOKEN": csrfToken, // Add the CSRF token here
             },
             body: JSON.stringify({
-                merchant_id: props.merchant_id,
+                merchant_id: props.merchant_id ?? 1,
                 code: couponCode.value, // Use the entered coupon code
             }),
         });

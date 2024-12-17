@@ -67,11 +67,11 @@ const handlePayment = async (product) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                merchant_id: props.merchant_id ?? 23,
+                merchant_id: props.merchant_id ?? 1,
                 productId: product.id,
                 productTitle: product.title,
                 amount: product.price,
-                currency: 2,
+                currency_id: 1,
                 description: 'Payment from test merchant',
                 gateway_id : 1
             }),

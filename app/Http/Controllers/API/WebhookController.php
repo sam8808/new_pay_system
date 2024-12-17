@@ -30,17 +30,24 @@ class WebhookController extends Controller
             // }
 
             // Находим платеж по external_id
-            $payment = Payment::where('external_id', $request->payment_id)->first();
+            $payment = Payment::where('external_id', $request->payment_id)
+                ->whereNotIn('status', [Payment::STATUS_COMPLETED_STRING])
+                ->first();
+
             if (!$payment) {
                 Log::error('Payment not found for webhook', [
                     'external_id' => $request->payment_id
                 ]);
-                return response()->json(['error' => 'Payment not found'], 404);
+                return response()->json(['error' => 'Payment not found', 'success' => false], 404);
             }
+
+            $wallet = $payment->merchant->user->wallets()->where('currency_id', $payment->currency_id)->first();
 
             if($request->isSuccess){
                 $payment->status = Payment::STATUS_COMPLETED_STRING;
+                $wallet->addToBalance($payment->amount_in_base_currency);
             }else{
+                $wallet->removeFromBalance($payment->amount);
                 $payment->status = Payment::STATUS_FAILED_STRING;
             }
 
@@ -51,8 +58,8 @@ class WebhookController extends Controller
             $this->sendWebhook($payment);
 
             return response()->json([
-                'status' => 'ok', 
-                'code' => 200, 
+                'status' => 'ok',
+                'code' => 200,
                 'success' => $request->isSuccess,
                 'message' => 'webhook processed'
             ]);

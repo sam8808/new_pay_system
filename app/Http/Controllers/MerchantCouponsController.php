@@ -200,6 +200,10 @@ class MerchantCouponsController extends Controller
         $coupon->payment->status = Payment::STATUS_COMPLETED_STRING;
         $coupon->payment->save();
 
+
+        $wallet = $coupon->payment->merchant->user->wallets()->where('currency_id', $coupon->payment->currency_id)->first();
+        $wallet->addToBalance($coupon->payment->amount_in_base_currency);
+
         return response()->json([
             'message' => 'Coupon verified and payment confirmed',
             'code' => $coupon->code,

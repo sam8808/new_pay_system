@@ -16,7 +16,7 @@ class GatewayPaymentController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
-            'currency' => 'required|numeric',
+            'currency_id' => 'required|numeric',
             'description' => 'required|string',
             'gateway_id' => 'required|numeric',
             'merchant_id' => 'required|numeric',
