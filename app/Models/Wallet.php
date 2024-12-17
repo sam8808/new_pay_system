@@ -50,4 +50,20 @@ class Wallet extends Model
     {
         return $this->hasMany(Withdrawal::class);
     }
+
+    public function addToBalance(int|float $amount){
+        $this->balance += $amount;
+        return $this->save();
+    }
+
+    private function removeFromBalance(int|float $amount){
+
+        $this->balance -= $amount;
+
+        if($this->balance < 0){
+            $this->balance = 0;
+        }
+
+        return $this->save();
+    }
 }

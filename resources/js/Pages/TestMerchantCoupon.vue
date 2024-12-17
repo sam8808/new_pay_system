@@ -21,7 +21,7 @@ const createCoupon = async () => {
                 "X-CSRF-TOKEN": csrfToken, // Add the CSRF token here
             },
             body: JSON.stringify({
-                merchant_id: props.merchant_id,
+                merchant_id: props.merchant_id ?? 1,
                 amount: couponAmount.value, // Using the dynamic amount
                 currency: 'USD',
                 description: 'Payment from test merchant',

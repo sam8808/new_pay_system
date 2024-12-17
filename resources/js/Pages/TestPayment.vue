@@ -20,7 +20,7 @@
 		        });
 
 		        if (!response.ok) {
-		            throw new Error("Payment failed.");
+		            throw new Error("Payment failed. Or payment not found.");
 		        }
 
 		        const result = await response.json();
@@ -31,13 +31,14 @@
                 }
 		    } catch (error) {
 		        console.error(error);
-		    } 
+                alert(error.message);
+		    }
 	      },
 	        showNotification(type, message) {
             	alert(`${type.toUpperCase()}: ${message}`); // Replace with custom notification logic
         	},
 	    },
-	    
+
 	 };
 </script>
 <template>
@@ -47,7 +48,7 @@
 	  <div class="col-75">
 	    <div class="container">
 	      <form method="post">
-	      
+
 	        <div class="row">
 	          <div class="col-50">
 	            <h3>Billing Address</h3>
@@ -74,7 +75,7 @@
 
 	          <div class="col-50">
 	            <h3>Payment</h3>
-	           
+
 	            <label for="cname">Name on Card</label>
 	            <input type="text" id="cname" name="cardname" placeholder="John More Doe">
 	            <label for="ccnum">Credit card number</label>
@@ -92,7 +93,7 @@
 	              </div>
 	            </div>
 	          </div>
-	          
+
 	        </div>
 	        <label>
 	          <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
