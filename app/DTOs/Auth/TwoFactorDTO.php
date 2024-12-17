@@ -9,7 +9,7 @@ readonly class TwoFactorDTO
     public function __construct(
         public int $userId,
         public string $code,
-        public string $type
+        public string $type = 'email'
     ) {}
 
     public static function fromArray(array $data): self
