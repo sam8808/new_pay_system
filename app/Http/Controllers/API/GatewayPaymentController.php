@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\GatewayPayment;
 use App\Models\Payment;
+use App\Models\Transaction;
 use App\Models\Merchant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -51,6 +52,19 @@ class GatewayPaymentController extends Controller
             'metadata' => '',
             'expires_at' => time(),
             'processed_at' => time()
+        ]);
+
+        $wallet = $payment->merchant->user->wallets()->where('currency_id', $payment->currency_id)->first();
+
+        $transaction = Transaction::create([
+            'uuid' => $payment->uuid,
+            'user_id' => $payment->merchant->user_id,
+            'm_id' => $payment->merchant->id,
+            'amount' => $payment->amount,
+            'amount_in_base_currency' => $payment->amount_in_base_currency,
+            'currency_id' => $payment->currency_id,
+            'type' => 'deposit',
+            'wallet_id' => $wallet->id
         ]);
 
         // Передать запрос шлюзу

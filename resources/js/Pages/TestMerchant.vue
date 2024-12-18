@@ -68,6 +68,7 @@ const handlePayment = async (product) => {
             },
             body: JSON.stringify({
                 merchant_id: props.merchant_id ?? 1,
+                order_id : Math.random().toString(36).slice(2),
                 productId: product.id,
                 productTitle: product.title,
                 amount: product.price,

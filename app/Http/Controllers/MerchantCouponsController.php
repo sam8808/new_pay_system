@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateMerchantCouponsRequest;
 use App\Models\MerchantCoupons;
 use App\Models\Payment;
 use App\Models\Merchant;
+use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -213,6 +214,17 @@ class MerchantCouponsController extends Controller
             // update user balance
             $wallet = $coupon->payment->merchant->user->wallets()->where('currency_id', $coupon->payment->currency_id)->first();
             $wallet->addToBalance($coupon->payment->amount_in_base_currency);
+
+            $transaction = Transaction::create([
+                'uuid' => $coupon->payment->uuid,
+                'user_id' => $coupon->payment->merchant->user_id,
+                'm_id' => $coupon->payment->merchant->id,
+                'amount' => $coupon->payment->amount,
+                'amount_in_base_currency' => $coupon->payment->amount_in_base_currency,
+                'currency_id' => $coupon->payment->currency_id,
+                'type' => 'deposit',
+                'wallet_id' => $wallet->id
+            ]);
 
             return response()->json([
                 'message' => 'Coupon verified and payment confirmed',
