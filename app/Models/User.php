@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cookie;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -46,7 +47,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'referrer_id');
     }
+    public function getReferralsCount(){
+        return $this->referrals()->count();
+    }
+    public function referralStats(){
+        return [
+            'referralCode'  => $this->ref_code,
+            'totalEarnings' => 15000,
+            'activeReferrals' => $this->getReferralsCount(),
+            'totalReferrals' => $this->getReferralsCount(),
+            'conversionRate' => 48,
+            'referralLink' => url("/invite/{$this->ref_code}"),
+        ];
 
+    }
     public function wallets()
     {
         return $this->hasMany(Wallet::class);
@@ -65,5 +79,8 @@ class User extends Authenticatable
     public function withdrawals()
     {
         return $this->hasMany(Withdrawal::class);
+    }
+    static function getReferer(){
+        return Cookie::get('ref_code');
     }
 }

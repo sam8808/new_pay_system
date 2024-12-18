@@ -60,6 +60,7 @@ Route::middleware('guest')->group(function () {
 
     Route::get('test/merchant/webhook', [TestMerchantController::class, 'webhook'])
         ->name('test.merchant');
+    Route::get('invite/{ref_code}', [HomeController::class, 'invite']);
 });
 Route::post('logout', [LoginController::class, 'logout'])
     ->name('logout');

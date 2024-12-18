@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import {ref, computed, mergeProps} from "vue";
 import {
     Users,
     Link as LinkIcon,
