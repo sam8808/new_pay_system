@@ -13,9 +13,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use App\Http\Controllers\API\GatewayController;
+use App\Services\FraudMonitoringService;
 
 class MerchantCouponsController extends Controller
 {
+    protected $fraudMonitoring;
+
+    public function __construct(FraudMonitoringService $fraudMonitoring)
+    {
+        $this->fraudMonitoring = $fraudMonitoring;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -214,6 +222,18 @@ class MerchantCouponsController extends Controller
             // update user balance
             $wallet = $coupon->payment->merchant->user->wallets()->where('currency_id', $coupon->payment->currency_id)->first();
             $wallet->addToBalance($coupon->payment->amount_in_base_currency);
+
+
+            // Fraud monitoring before creating a transaction
+            if ($this->fraudMonitoring->analyzeTransaction((object) [
+                'user_id' => $coupon->payment->merchant->user_id,
+                'amount' => $coupon->payment->amount,
+            ])) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaction flagged as potential fraud.',
+                ], 403);
+            }
 
             $transaction = Transaction::create([
                 'uuid' => $coupon->payment->uuid,
