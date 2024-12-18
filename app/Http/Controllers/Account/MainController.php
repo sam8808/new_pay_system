@@ -168,7 +168,16 @@ class MainController extends Controller
 
         return Inertia::render('Account/Partners', [
             'referralStats' => auth()->user()->referralStats(),
-            'referrals' => auth()->user()->referrals()
+            'referrals' => auth()->user()->referrals()->get(['id', 'email', 'created_at'])->map(function ($referral) {
+                return [
+                    'id' => $referral->id,
+                    'email' => $referral->email,
+                    'registrationDate' => $referral->created_at,
+                    'totalEarned' => 1000 * $referral->id,
+                    'status' => 'active',
+                    'lastActivityDate' => $referral->created_at,
+                ];
+            })
         ]);
     }
 }
