@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use Exception;
 use App\Models\User;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -102,6 +103,12 @@ class RegisterService
                     'is_verified' => false
                 ]);
             });
+            do {
+                $ref_code = substr(hash('sha256', $this->user->id . time()), 0, 5);
+            } while (User::where('ref_code', $ref_code)->exists());
+
+            $this->user->ref_code = $ref_code;
+            $this->user->save();
         } catch (Exception $e) {
             $this->handleStoreError($e);
             throw $e;
@@ -189,8 +196,8 @@ class RegisterService
 
     private function getReferrer(): ?int
     {
-        return Session::has('ref_code')
-            ? User::where('ref_code', Session::get('ref_code'))->value('id')
+        return ($refCode = Cookie::get('ref_code'))
+            ? User::where('ref_code', $refCode)->value('id')
             : null;
     }
 

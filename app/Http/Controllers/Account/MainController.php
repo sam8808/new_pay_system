@@ -164,6 +164,11 @@ class MainController extends Controller
 
     public function partners()
     {
-        return Inertia::render('Account/Partners');
+
+
+        return Inertia::render('Account/Partners', [
+            'referralStats' => auth()->user()->referralStats(),
+            'referrals' => auth()->user()->referrals()
+        ]);
     }
 }
