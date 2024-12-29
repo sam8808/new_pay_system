@@ -71,7 +71,7 @@ const handlePayment = async (product) => {
                 order_id : Math.random().toString(36).slice(2),
                 productId: product.id,
                 productTitle: product.title,
-                amount: product.price,
+                amount: Number(amount.value),
                 currency_id: 1,
                 description: 'Payment from test merchant',
                 gateway_id : 1
